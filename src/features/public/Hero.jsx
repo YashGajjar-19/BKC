@@ -57,6 +57,12 @@ export default function Hero() {
                     </button>
                 </motion.div>
             </div>
+
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-indigo-50/80 via-purple-50/50 to-transparent blur-3xl -z-10 rounded-[100%]" />
+            </div>
+
+            
         </section>
     );
 }

@@ -2,20 +2,34 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import Crew from "./pages/Crew";
+import Profile from "./pages/Profile";
+import Overview from "./features/dashboard/Overview";
+import Missions from "./features/dashboard/Missions";
+import DashboardLayout from "./components/layouts/DashboardLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
-export default function App() {
+export default function App ()
+{
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={
+          {/* Public Routes */ }
+          <Route path="/" element={ <Home /> } />
+          <Route path="/login" element={ <Login /> } />
+          <Route path="/crew" element={ <Crew /> } />
+          <Route path="/profile/:id" element={ <Profile /> } />
+
+          {/* Dashboard Routes with Nested Routing */ }
+          <Route path="/dashboard/*" element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardLayout>
+                <Routes>
+                  <Route index element={ <Overview /> } />
+                  <Route path="missions" element={ <Missions /> } />
+                </Routes>
+              </DashboardLayout>
             </ProtectedRoute>
           } />
         </Routes>

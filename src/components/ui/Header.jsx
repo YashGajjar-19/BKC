@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import { User, LogIn, Menu, X, Rocket, Users, Globe } from 'lucide-react';
+import { LogIn, Menu, X, Rocket, Users, Globe } from 'lucide-react';
 
 export default function Header() {
     const { user } = useAuth();
@@ -22,7 +22,7 @@ export default function Header() {
     const navLinks = [
         { name: 'Home', path: '/', icon: Globe },
         { name: 'Universe', path: '/universe', icon: Rocket },
-        { name: 'The Crew', path: '/crew', icon: Users },
+        { name: "The Crew", path: "/#crew", icon: Users },
     ];
 
     return (
@@ -31,22 +31,38 @@ export default function Header() {
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
                 transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                className={`fixed top-0 left-0 right-0 z-50 flex justify-center transition-all duration-500 pointer-events-none ${scrolled ? 'pt-4' : 'pt-8'}`}
+                className={`fixed top-0 left-0 right-0 z-50 flex justify-center transition-all duration-500 ${
+                    scrolled ? 'pt-0' : 'pt-8'
+                }`}
             >
-                <div className="pointer-events-auto relative group">
+                <div 
+                    className={`relative group transition-all duration-500 ease-in-out ${
+                        scrolled ? 'w-full' : 'w-[calc(100%-2rem)] max-w-5xl'
+                    }`}
+                >
                     
                     {/* --- Animated Glow Under-bar --- */}
-                    {/* Replicating the Login.jsx gradient colors: #00C6FF (Cyan), #9D00FA (Purple), #0055FF (Deep Blue), #FF5ACD (Pink) */}
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00C6FF] via-[#9D00FA] to-[#FF5ACD] rounded-full blur-md opacity-40 group-hover:opacity-80 transition duration-500 animate-gradient-xy"></div>
+                    {/* Positioned under the nav to create the light effect. 
+                        When scrolled, we might want to reduce it or keep it as a bottom border glow. 
+                        Let's keep it but adjust positioning. */}
+                    <div 
+                        className={`absolute left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#00C6FF] via-[#9D00FA] to-[#FF5ACD] opacity-40 group-hover:opacity-80 transition-all duration-1000 animate-gradient-xy pointer-events-none ${
+                            scrolled 
+                                ? 'bottom-0 h-[2px] w-full blur-[4px]' // Detailed border glow when full width
+                                : '-bottom-4 h-[40px] w-[80%] rounded-[100%] blur-[30px]' // The "light under navbar" effect
+                        }`}
+                    ></div>
                     
-                    {/* --- Main Glass Navbar --- */}
+                    {/* --- Main Navbar --- */}
                     <nav className={`
                         relative flex items-center justify-between
-                        bg-white/90 backdrop-blur-xl border border-white/60
-                        rounded-full shadow-lg shadow-indigo-500/10
-                        transition-all duration-500 ease-out
-                        ${scrolled ? 'px-6 py-3 scale-95' : 'px-8 py-4 scale-100'}
-                        gap-4 md:gap-12
+                        bg-white/80 backdrop-blur-xl border-white/50
+                        shadow-lg shadow-indigo-500/5
+                        transition-all duration-500 ease-in-out
+                        ${scrolled 
+                            ? 'w-full rounded-none border-b px-8 py-4' 
+                            : 'w-full rounded-full border px-8 py-4'
+                        }
                     `}>
                         
                         {/* 1. Logo */}
@@ -58,7 +74,7 @@ export default function Header() {
                         </Link>
 
                         {/* 2. Desktop Navigation */}
-                        <div className="hidden md:flex items-center gap-1">
+                        <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
                             {navLinks.map((link) => {
                                 const isActive = location.pathname === link.path;
                                 const Icon = link.icon;
@@ -70,6 +86,7 @@ export default function Header() {
                                         className="relative px-5 py-2 rounded-full text-sm font-bold transition-all hover:bg-slate-100 overflow-hidden group/link"
                                     >
                                         <span className={`relative z-10 flex items-center gap-2 ${isActive ? 'text-indigo-600' : 'text-slate-600 group-hover/link:text-slate-900'}`}>
+                                            <Icon size={16} strokeWidth={2.5} />
                                             {link.name}
                                         </span>
                                         {isActive && (
@@ -93,7 +110,7 @@ export default function Header() {
                                     <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-white">
                                         <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
                                     </div>
-                                    <span className="text-sm font-bold text-slate-700 group-hover/user:text-indigo-600 max-w-[100px] truncate">
+                                    <span className="text-sm font-bold text-slate-700 group-hover/user:text-indigo-600 max-w-[100px] truncate hidden md:block">
                                         {user.name.split(' ')[0]}
                                     </span>
                                 </Link>

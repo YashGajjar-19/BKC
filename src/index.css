@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-display: "Syne", sans-serif;
+}
+
+@layer base {
+  body {
+    /* Sets the body to use Plus Jakarta Sans */
+    @apply font-sans antialiased bg-slate-50 text-slate-900;
+  }
+  
+  /* Forces all headings to use the new Syne font */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
