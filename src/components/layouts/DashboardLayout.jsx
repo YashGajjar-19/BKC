@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
     LayoutDashboard, Users, Zap, Settings, LogOut,
-    Search, Bell
+    Search, Bell, Globe
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -43,6 +43,7 @@ export default function DashboardLayout({ children }) {
         { icon: Zap, label: "Missions", path: "/dashboard/missions" },
         { icon: Users, label: "Agents", path: "/dashboard/team" },
         { icon: Settings, label: "Settings", path: "/dashboard/settings" },
+        { icon: Globe, label: "Public Universe", path: "/" },
     ];
 
     const handleLogout = () => {

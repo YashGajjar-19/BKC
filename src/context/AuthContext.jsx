@@ -1,40 +1,98 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+// src/context/AuthContext.jsx
+import { createContext, useContext, useEffect, useState } from "react";
+import
+    {
+        GoogleAuthProvider,
+        signInWithPopup,
+        signOut,
+        onAuthStateChanged
+    } from "firebase/auth";
+import { auth } from "../lib/firebase"; // Make sure this path is correct
+import { members } from "../data";
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
-    return useContext(AuthContext);
-};
+export const AuthProvider = ( { children } ) =>
+{
+    const [ user, setUser ] = useState( null );
+    const [ loading, setLoading ] = useState( true );
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+    // 1. The Real Login Function
+    const loginWithGoogle = async ( selectedMemberId ) =>
+    {
+        try
+        {
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup( auth, provider );
+            const googleUser = result.user;
 
-    // ... existing firebase logic ... (Placeholder if you add Firebase later)
+            // 2. Security Check: Does the Google Email match the Selected Member?
+            const selectedMember = members.find( m => m.id === selectedMemberId );
 
-    // ADD THIS FUNCTION
-    const login = (memberData) => {
-        // We manually set the user state to the selected member
-        setUser(memberData);
-        // Optional: Save to localStorage so refresh doesn't kill session
-        localStorage.setItem("bakchodi_user", JSON.stringify(memberData));
+            if ( googleUser.email === selectedMember.email )
+            {
+                // SUCCESS: Merge Firebase user with your local member data
+                const mergedUser = {
+                    ...googleUser,
+                    ...selectedMember, // Adds role, image, title to the user object
+                    uid: googleUser.uid // Keep Firebase UID for database/chat
+                };
+                setUser( mergedUser );
+                return { success: true };
+            } else
+            {
+                // FAILURE: Wrong email for this profile
+                await signOut( auth ); // Kick them out immediately
+                return {
+                    success: false,
+                    error: `Identity Mismatch! You logged in as ${ googleUser.email }, but this profile belongs to ${ selectedMember.email }.`
+                };
+            }
+        } catch ( error )
+        {
+            console.error( "Login Error:", error );
+            return { success: false, error: error.message };
+        }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem("bakchodi_user");
-        // Also sign out of firebase if you use it later
-        // signOut(auth); 
+    const logout = async () =>
+    {
+        await signOut( auth );
+        setUser( null );
     };
 
-    // On mount, check if user is in localStorage (for persistence)
-    useEffect(() => {
-        const saved = localStorage.getItem("bakchodi_user");
-        if (saved) setUser(JSON.parse(saved));
-    }, []);
+    // 3. Persistent Session
+    useEffect( () =>
+    {
+        const unsubscribe = onAuthStateChanged( auth, ( currentUser ) =>
+        {
+            if ( currentUser )
+            {
+                // If they refresh, find their member data again using their email
+                const memberData = members.find( m => m.email === currentUser.email );
+                if ( memberData )
+                {
+                    setUser( { ...currentUser, ...memberData } );
+                } else
+                {
+                    // If email is not in your list, force logout
+                    signOut( auth );
+                    setUser( null );
+                }
+            } else
+            {
+                setUser( null );
+            }
+            setLoading( false );
+        } );
+        return () => unsubscribe();
+    }, [] );
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
+        <AuthContext.Provider value={ { user, loginWithGoogle, logout, loading } }>
+            { !loading && children }
         </AuthContext.Provider>
     );
 };
+
+export const useAuth = () => useContext( AuthContext );

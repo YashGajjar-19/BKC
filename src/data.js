@@ -100,6 +100,7 @@ export const members = [
     {
         id: 1,
         name: "Yash Gajjar",
+        email: "gajjaryash195@gmail.com",
         role: "Founder & Admin",
         title: "The Founder",
         description: "Does A-Z things and fun in the company.",
