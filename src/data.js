@@ -224,22 +224,4 @@ export const members = [
             tasks: ["Annoying Preet", "Distributing Gossip", "Authorized Security Breaches"]
         }
     },
-    {
-        id: 8,
-        name: "Yashvi Meghani",
-        role: "Production, Sales & R&D",
-        title: "The Ultimate Annoyer",
-        description: "Most annoying employee. Handles Production, Sales, and R&D.",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=YashviMeghani&backgroundColor=ffd5dc",
-        password: "123",
-        details: {
-            age: 21,
-            dob: "07-07-2005",
-            place: "Paris, France",
-            departments: ["R&D", "Sales", "Chaos Production"],
-            post: "Vice President of Nuisance",
-            salary: "$500 Quadrillion + 50 Private Cities",
-            tasks: ["Creating Bugs (Intentionally)", "R&D on Method Acting", "Selling Ice to Eskimos"]
-        }
-    },
 ];
