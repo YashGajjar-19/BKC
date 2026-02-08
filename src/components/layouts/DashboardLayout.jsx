@@ -26,9 +26,6 @@ const NavItem = ( { icon: Icon, label, path, isActive, isCollapsed } ) => (
                     { label }
                 </motion.span>
             ) }
-
-            {/* Active Indicator Dot */ }
-
         </div>
     </Link>
 );
@@ -39,9 +36,7 @@ export default function DashboardLayout ( { children } )
     const location = useLocation();
     const navigate = useNavigate();
     const [ isCollapsed, setIsCollapsed ] = useState( false );
-
-    // Android 17 style: Often has a persistent bottom nav on mobile, rail on tablet/desktop. 
-    // We'll stick to a responsive sidebar approach for desktop.
+    const [ isMobileMenuOpen, setIsMobileMenuOpen ] = useState( false ); // Mobile Menu State
 
     const navItems = [
         { icon: LayoutDashboard, label: "Overview", path: "/dashboard" },
@@ -64,7 +59,7 @@ export default function DashboardLayout ( { children } )
                Text Color: #1F1F1F is standard Material OnSurface.
             */}
 
-            {/* --- SIDEBAR (Navigation Rail / Drawer) --- */ }
+            {/* --- SIDEBAR (Desktop) --- */ }
             <motion.aside
                 initial={ false }
                 animate={ { width: isCollapsed ? 88 : 300 } }
@@ -123,22 +118,104 @@ export default function DashboardLayout ( { children } )
                 </div>
             </motion.aside>
 
+            {/* --- MOBILE NAVIGATION DRAWER --- */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 md:hidden"
+                        />
+                        
+                        {/* Drawer */}
+                        <motion.aside
+                            initial={{ x: "-100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="fixed top-0 left-0 bottom-0 w-[280px] bg-[#F2F6FC] z-50 md:hidden shadow-2xl flex flex-col"
+                        >
+                            {/* Drawer Header */}
+                            <div className="p-6 flex items-center justify-between">
+                                 <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#D3E3FD] flex items-center justify-center shrink-0 text-indigo-900 shadow-inner">
+                                        <span className="font-black text-lg">B</span>
+                                    </div>
+                                    <span className="font-bold text-lg text-[#1F1F1F] tracking-tight">BKC Admin</span>
+                                </div>
+                                <button 
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="p-2 text-slate-400 hover:bg-slate-200 rounded-full transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Drawer Items */}
+                            <div className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
+                                {navItems.map((item) => (
+                                    <Link 
+                                        key={item.path} 
+                                        to={item.path}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <div className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
+                                            location.pathname === item.path
+                                                ? "bg-indigo-100 text-indigo-900" 
+                                                : "text-slate-500 hover:bg-slate-100"
+                                        }`}>
+                                            <item.icon size={24} strokeWidth={location.pathname === item.path ? 2.5 : 2} />
+                                            <span className="font-bold text-sm tracking-wide">{item.label}</span>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+
+                            {/* Drawer Footer */}
+                            <div className="p-4 mt-auto">
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-3 w-full px-4 py-4 rounded-xl text-slate-500 hover:bg-[#FFDAD6] hover:text-[#BA1A1A] transition-colors font-bold"
+                                >
+                                    <LogOut size={24} />
+                                    <span>Sign Out</span>
+                                </button>
+                            </div>
+                        </motion.aside>
+                    </>
+                )}
+            </AnimatePresence>
+
             {/* --- MAIN CONTENT --- */ }
             <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
 
                 {/* Top Bar (Floating Style) */ }
-                <header className="h-24 px-8 flex items-center justify-between shrink-0">
-                    {/* Page Title / Breadcrumbs */ }
-                    <div className="flex flex-col">
-                        <h1 className="text-3xl font-normal text-[#1F1F1F] tracking-tight flex items-center gap-2">
-                            { navItems.find( i => i.path === location.pathname )?.label || "Dashboard" }
-                        </h1>
+                <header className="h-20 md:h-24 px-4 md:px-8 flex items-center justify-between shrink-0 transition-all">
+                    {/* Left Side including Mobile Toggle */}
+                    <div className="flex items-center gap-3 md:gap-0">
+                         {/* Mobile Toggle Button */}
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100/80 rounded-full transition-colors"
+                        >
+                            <Menu size={24} />
+                        </button>
+
+                        <div className="flex flex-col">
+                            <h1 className="text-2xl md:text-3xl font-normal text-[#1F1F1F] tracking-tight flex items-center gap-2">
+                                { navItems.find( i => i.path === location.pathname )?.label || "Dashboard" }
+                            </h1>
+                        </div>
                     </div>
 
                     {/* Actions Pill */ }
-                    <div className="flex items-center gap-3 bg-white p-2 pr-6 pl-2 rounded-full shadow-sm">
+                    <div className="flex items-center gap-3 bg-white p-2 pr-2 md:pr-6 md:pl-2 rounded-full shadow-sm">
 
-                        {/* Search */ }
+                        {/* Search (Hide on small mobile?) */}
                         <div className="hidden md:flex items-center bg-[#F2F6FC] rounded-full px-4 py-2 w-64 focus-within:ring-2 ring-indigo-200 transition-all">
                             <Search size={ 20 } className="text-slate-400 mr-2" />
                             <input
@@ -148,8 +225,8 @@ export default function DashboardLayout ( { children } )
                             />
                         </div>
 
-                        {/* User User */ }
-                        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm ml-2">
+                        {/* User User */}
+                        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm ml-0 md:ml-2">
                             <img src={ user?.image } alt="User" className="w-full h-full object-cover" />
                         </div>
                     </div>

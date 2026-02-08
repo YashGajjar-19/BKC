@@ -7,10 +7,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Body: The clean, tech look (Option 1)
-        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-        // Headings: The artistic, premium look (Option 3)
-        display: ['"Syne"', 'sans-serif'],
+        // Body: Clean, readable, tech-forward
+        sans: [ '"Plus Jakarta Sans"', 'sans-serif' ],
+
+        // Headings: The "Chaos" personality
+        display: [ '"Bricolage Grotesque"', 'sans-serif' ],
       },
     },
   },
