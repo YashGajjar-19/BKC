@@ -4,7 +4,7 @@ import groupSelfie from "../../assets/images/grp_bit/Group.png";
 
 export default function Hero() {
     return (
-        <section className="relative h-screen min-h-[800px] w-full flex flex-col items-center overflow-hidden bg-white">
+        <section className="relative h-screen min-h-[130px] w-full flex flex-col items-center overflow-hidden bg-white">
 
             {/* --- Background Ambient (Subtle) --- */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(120,119,198,0.1),transparent_50%)]" />
@@ -61,19 +61,12 @@ export default function Hero() {
                 transition={{ delay: 0.2, duration: 1, type: "spring", damping: 20, stiffness: 90 }}
                 className="absolute bottom-0 left-0 right-0 w-full z-10 flex justify-center pointer-events-none"
             >
-                {/* 
-                    Image Logic:
-                    - w-full: Spans entire screen width (User Request)
-                    - object-cover: Ensures no whitespace on sides
-                    - object-[center_top]: Focuses on the faces, crops bottom of shirts if needed
-                    - max-h to prevent hiding the text completely on small screens
-                */}
                 <img 
                     src={groupSelfie} 
                     alt="Team Group Selfie" 
-                    className="w-full h-[55vh] md:h-[65vh] lg:h-[80vh] object-cover object-top drop-shadow-2xl"
+                    className="w-full h-[65vh] md:h-[75vh] lg:h-[120vh] object-cover object-top drop-shadow-2xl"
                 />
-            </motion.div>z
+            </motion.div>
             
             {/* Optional Gradient Overlay at bottom to blend image if it's not a perfect cutout, 
                 or to add depth. Removed for now to keep it clean 'magazine' style per user feedback. */}
