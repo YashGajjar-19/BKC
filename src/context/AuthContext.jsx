@@ -8,7 +8,7 @@ import
         onAuthStateChanged
     } from "firebase/auth";
 import { auth } from "../lib/firebase"; // Make sure this path is correct
-import { members } from "../data";
+import { members } from "../lib/data";
 
 const AuthContext = createContext();
 

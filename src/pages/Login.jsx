@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Lock, ChevronLeft, ShieldCheck, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { members } from '../data';
+import { members } from '../lib/data';
 
 export default function Login() {
     const navigate = useNavigate();

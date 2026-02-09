@@ -1,20 +1,20 @@
+// src/components/layouts/PublicLayout.jsx
 import Header from "../ui/Header";
+import Footer from "../ui/Footer";
 
 export default function PublicLayout({ children }) {
     return (
-        <div className="min-h-screen bg-slate-50 font-sans selection:bg-purple-500 selection:text-white">
-            {/* New Premium Header */}
+        <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+            {/* Header (Fixed) */}
             <Header />
 
-            {/* Page Content */}
-            <main className="pt-32 pb-20 px-4 md:px-8 max-w-7xl mx-auto">
+            {/* Page Content - Full Width to allow sections to control their own backgrounds */}
+            <main className="w-full">
                 {children}
             </main>
 
-            {/* Footer (Simple Version for now) */}
-            <footer className="py-12 text-center text-slate-400 text-sm">
-                <p>&copy; 2026 Bakchodi International. All wrongs reserved.</p>
-            </footer>
+            {/* Footer (Full Version) */}
+            <Footer />
         </div>
     );
 }

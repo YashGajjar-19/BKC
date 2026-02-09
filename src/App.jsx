@@ -2,12 +2,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Crew from "./pages/Crew";
 import Profile from "./pages/Profile";
 import Overview from "./features/dashboard/Overview";
 import Missions from "./features/dashboard/Missions";
+import CommChannel from "./features/dashboard/Chat/CommChannel";
 import DashboardLayout from "./components/layouts/DashboardLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PublicLayout from "./components/layouts/PublicLayout";
 
 export default function App ()
 {
@@ -18,8 +19,14 @@ export default function App ()
           {/* Public Routes */ }
           <Route path="/" element={ <Home /> } />
           <Route path="/login" element={ <Login /> } />
-          <Route path="/crew" element={ <Crew /> } />
           <Route path="/profile/:id" element={ <Profile /> } />
+
+          {/* Chat Route (Protected, Standalone with Global Header) */}
+          <Route path="/chat" element={
+            <ProtectedRoute>
+                <CommChannel />
+            </ProtectedRoute>
+          } />
 
           {/* Dashboard Routes with Nested Routing */ }
           <Route path="/dashboard/*" element={

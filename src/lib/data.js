@@ -1,4 +1,5 @@
 // src/data.js
+import yashImg from "../assets/images/per_bit/Yash.png";
 
 export const companyDetails = {
     name: "Bakchodi International PVT. LTD.",
@@ -97,118 +98,68 @@ export const members = [
         id: 1,
         name: "Yash Gajjar",
         role: "Founder & Admin",
-        title: "The Architect",
-        email: "gajjaryash195@gmail.com",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Yash",
-        isAdmin: true,
-        password: "123",
-        // --- NEW DATA ---
+        title: "The Founder",
+        dob: "19 July 2005",
         age: "21",
-        dob: "19 Feb, 2005",
         salary: "$1,200,000",
-        description: "The mastermind behind the chaos. Yash spends 90% of his time tweaking CSS gradients and 10% actually coding. Known for deploying pranks directly into the production database.",
-        posts: [
-            { id: 101, image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=800", caption: "Hacking the mainframe (actually just inspecting element)." },
-            { id: 102, image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800", caption: "New setup. RGB increases speed by 200%." },
-            { id: 103, image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800", caption: "Touch grass? Never heard of her." }
-        ]
+        posts: "Founder and Admin",
+        description: "The mastermind behind the chaos.",
+        email: "[EMAIL_ADDRESS]",
+        image: yashImg,
+        isAdmin: true,
     },
     {
         id: 2,
         name: "Bhavy Trivedi",
         role: "Founder & CFO",
         title: "The CFO",
-        email: "bhavy@example.com",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Bhavy&backgroundColor=c0aede",
-        password: "123",
-        // --- NEW DATA ---
-        age: "22",
-        dob: "12 Aug, 2004",
+        dob: "19 August, 2006",
+        age: "20",
         salary: "$950,000",
+        posts: "Founder and CFO",
         description: "Bhavy manages the funds, which mostly involves buying premium coffee and denying our expense reports for 'Prank Supplies'.",
-        posts: [
-            { id: 201, image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=800", caption: "Stonks only go up 📈" },
-            { id: 202, image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?q=80&w=800", caption: "Another day, another spreadsheet." }
-        ]
+        email: "[EMAIL_ADDRESS]",
+        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Bhavy&backgroundColor=c0aede",
+        isAdmin: true,
     },
     {
         id: 3,
         name: "Drashti Bhatia",
         role: "General Manager & HR Head",
         title: "The Manager",
-        description: "Second in command. Manages the whole company and HR. If you're late, expect a 'friendly' chat.",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Drashti&backgroundColor=ffdfbf",
-        password: "123",
-        age: "22",
-        dob: "27 Sep, 2004",
-        salary: "$1,000,000",
-        posts: [
-             { id: 301, image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800", caption: "Reviewing performance (prank) metrics." },
-             { id: 302, image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800", caption: "HR is watching you." }
-        ]
+        description: "Second in command. Manages operations and HR with strict efficiency.",
+        posts: "General Manager & HR Head"
     },
     {
         id: 4,
         name: "Preet Malde",
         role: "Head of Security",
         title: "The Tank",
-        description: "Controls the army of guards. His bicep curls are the reason for our office earthquakes.",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Preet&backgroundColor=ffd5dc",
-        password: "123",
-        age: "21",
-        dob: "26 Feb, 2005",
-        salary: "$800,000",
-        posts: [
-            { id: 401, image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800", caption: "Security clearance: DENIED." },
-            { id: 402, image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800", caption: "Protecting the assets (mostly snacks)." }
-        ]
+        description: "Controls the security team. Ensures total asset protection.",
+        posts: "Head of Security"
     },
     {
         id: 5,
         name: "Dhruvi Vashiyar",
         role: "Manager (A-Z Dept) & Designer",
         title: "Creative Chaos",
-        description: "Idea giver, worst and best employee. Works under Yash. Mostly just makes memes.",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Dhruvi&backgroundColor=b6e3f4",
-        password: "123",
-        age: "20",
-        dob: "14 Jun, 2006",
-        salary: "$500,000",
-        posts: [
-            { id: 501, image: "https://images.unsplash.com/photo-1626785774573-4b79931434f3?q=80&w=800", caption: "Design is my passion." },
-            { id: 502, image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800", caption: "Fixing pixels, breaking hearts." }
-        ]
+        description: "Creative powerhouse. Designing chaos into art one pixel at a time.",
+        posts: "Manager & Designer"
     },
     {
         id: 6,
         name: "Vaishali Chavda",
         role: "Finance Manager",
         title: "Number Cruncher",
-        description: "Works under Bhavy. Second highest in finance. Can calculate tax fraud in her head.",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Vaishali&backgroundColor=d1d4f9",
-        password: "123",
-        age: "19",
-        dob: "02 Jan, 2007",
-        salary: "$600,000",
-        posts: [
-            { id: 601, image: "https://images.unsplash.com/photo-1554224154-26032ffc0d07?q=80&w=800", caption: "Numbers don't lie, but I do." },
-            { id: 602, image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800", caption: "Quarterly review time!" }
-        ]
+        description: "Handles accounts and tax compliance with precision.",
+        posts: "Finance Manager"
     },
     {
         id: 7,
         name: "Riddhi Kaloliya",
         role: "Security Manager",
         title: "The Annoyer",
-        description: "Works under Preet. Worst and most annoying employee. Professional pest.",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Riddhi&backgroundColor=ffdfbf",
-        password: "123",
-        age: "21",
-        dob: "26 Dec, 2005",
-        salary: "$400,000",
-        posts: [
-            { id: 701, image: "https://images.unsplash.com/photo-1481349518771-20055b2a7b24?q=80&w=800", caption: "Annoying Preet is my full-time job." },
-            { id: 702, image: "https://images.unsplash.com/photo-1485217988980-11786ced9454?q=80&w=800", caption: "Caught on camera!" }
-        ]
+        description: "Expert in surveillance and asset monitoring.",
+        posts: "Security Manager"
     },
 ];

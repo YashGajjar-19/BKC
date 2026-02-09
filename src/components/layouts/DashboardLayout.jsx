@@ -2,119 +2,128 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import
-    {
-        LayoutDashboard, Users, Zap, Settings, LogOut,
-        Search, Bell, Menu, X, Globe, ChevronRight
-    } from "lucide-react";
+import { LayoutDashboard, Users, Zap, Settings, LogOut, Search, Menu, X, Globe, ChevronRight, MessageSquare, Bell } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const NavItem = ( { icon: Icon, label, path, isActive, isCollapsed } ) => (
-    <Link to={ path }>
-        <div className={ `relative flex items-center gap-4 px-4 py-3.5 my-1 rounded-full transition-all duration-300 group ${ isActive
-            ? "bg-indigo-100 text-indigo-900"
-            : "text-slate-500 hover:bg-slate-100/80 hover:text-slate-900"
-            }` }>
-            <Icon size={ 24 } strokeWidth={ isActive ? 2.5 : 2 } className={ `transition-transform duration-300 ${ isActive ? 'scale-110' : 'group-hover:scale-110' }` } />
+const NavItem = ({ icon: Icon, label, path, isActive, isCollapsed }) => (
+    <Link to={path} title={isCollapsed ? label : ""}>
+        <div className={`relative flex items-center ${isCollapsed ? 'justify-center py-4' : 'gap-4 px-4 py-3'} my-2 rounded-xl transition-all duration-300 group ${
+            isActive
+                ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+        }`}>
+            <Icon size={20} strokeWidth={isActive ? 2 : 1.5} className={`shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
 
-            { !isCollapsed && (
-                <motion.span
-                    initial={ { opacity: 0, x: -10 } }
-                    animate={ { opacity: 1, x: 0 } }
-                    className="font-bold text-sm tracking-wide whitespace-nowrap"
-                >
-                    { label }
-                </motion.span>
-            ) }
+            {!isCollapsed && (
+                <span className={`text-sm tracking-wide ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                    {label}
+                </span>
+            )}
         </div>
     </Link>
 );
 
-export default function DashboardLayout ( { children } )
-{
+export default function DashboardLayout({ children }) {
     const { user, logout } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
-    const [ isCollapsed, setIsCollapsed ] = useState( false );
-    const [ isMobileMenuOpen, setIsMobileMenuOpen ] = useState( false ); // Mobile Menu State
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const navItems = [
         { icon: LayoutDashboard, label: "Overview", path: "/dashboard" },
-        { icon: Zap, label: "Missions", path: "/dashboard/missions" },
+        { icon: Zap, label: "Directives", path: "/dashboard/missions" },
         { icon: Users, label: "Agents", path: "/dashboard/team" },
-        { icon: Settings, label: "Settings", path: "/dashboard/settings" },
-        { icon: Globe, label: "Public Universe", path: "/" },
+        { icon: Settings, label: "Global Settings", path: "/dashboard/settings" },
     ];
 
-    const handleLogout = () =>
-    {
+    const handleLogout = () => {
         logout();
-        navigate( "/" );
+        navigate("/");
     };
 
     return (
-        <div className="min-h-screen bg-[#F2F6FC] text-[#1F1F1F] font-sans selection:bg-indigo-200 flex overflow-hidden">
-            {/* 
-               Background Color: #F2F6FC is a common Google Material 3 surface color (Surface Container Low).
-               Text Color: #1F1F1F is standard Material OnSurface.
-            */}
-
-            {/* --- SIDEBAR (Desktop) --- */ }
+        <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-indigo-500 selection:text-white flex overflow-hidden">
+            
+            {/* --- SIDEBAR (Desktop) --- */}
             <motion.aside
-                initial={ false }
-                animate={ { width: isCollapsed ? 88 : 300 } }
-                transition={ { type: "spring", stiffness: 300, damping: 30 } }
-                className="h-screen py-4 pl-4 hidden md:flex flex-col relative z-50 shrink-0"
+                initial={false}
+                animate={{ width: isCollapsed ? 80 : 260 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="h-screen hidden md:flex flex-col border-r border-slate-200 bg-white relative z-50 shrink-0"
             >
-                {/* Floating Sidebar Container */ }
-                <div className="bg-white h-full w-full rounded-[2rem] shadow-sm flex flex-col justify-between overflow-hidden relative">
-
-                    {/* Header / Logo */ }
-                    <div className="p-6 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-[#D3E3FD] flex items-center justify-center shrink-0 text-indigo-900 shadow-inner">
-                            <span className="font-black text-xl">B</span>
+                {/* Header / Logo */}
+                <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-6'} h-20 border-b border-slate-100/50`}>
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shrink-0 text-white shadow-md shadow-slate-900/10 transition-transform group-hover:scale-105">
+                            <span className="font-bold text-sm">B</span>
                         </div>
-                        { !isCollapsed && (
-                            <motion.div
-                                initial={ { opacity: 0 } }
-                                animate={ { opacity: 1 } }
-                                className="flex flex-col"
-                            >
-                                <span className="font-bold text-lg text-[#1F1F1F] tracking-tight">BKC Admin</span>
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Workspace</span>
-                            </motion.div>
-                        ) }
+                        {!isCollapsed && (
+                            <div className="flex flex-col">
+                                <span className="font-bold text-sm text-slate-900 leading-tight">Console</span>
+                                <span className="text-[10px] font-medium text-slate-400">Workspace</span>
+                            </div>
+                        )}
+                    </Link>
+                </div>
+
+                {/* Navigation Items */}
+                <div className="flex-1 overflow-y-auto py-8 flex flex-col gap-8 px-5 custom-scrollbar">
+                    
+                    {/* Main Menu */}
+                    <div>
+                        {!isCollapsed && <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-2 opacity-80">Workspace</div>}
+                        <div className="space-y-1">
+                            {navItems.map((item) => (
+                                <NavItem
+                                    key={item.path}
+                                    {...item}
+                                    isActive={location.pathname === item.path}
+                                    isCollapsed={isCollapsed}
+                                />
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Navigation Items */ }
-                    <div className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-                        { navItems.map( ( item ) => (
-                            <NavItem
-                                key={ item.path }
-                                { ...item }
-                                isActive={ location.pathname === item.path }
-                                isCollapsed={ isCollapsed }
-                            />
-                        ) ) }
+                    {/* Shortcuts / Other */}
+                    <div>
+                       {!isCollapsed && <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-2 opacity-80">Quick Access</div>}
+                       <div className="space-y-1">
+                           <NavItem icon={Globe} label="Public Site" path="/" isActive={false} isCollapsed={isCollapsed} />
+                           <NavItem icon={MessageSquare} label="Comm Channel" path="/chat" isActive={false} isCollapsed={isCollapsed} />
+                       </div>
                     </div>
 
-                    {/* Footer / User */ }
-                    <div className="p-4 bg-[#F8FAFD] mt-auto">
-                        <button
-                            onClick={ handleLogout }
-                            className={ `flex items-center gap-3 w-full px-4 py-4 rounded-2xl text-slate-500 hover:bg-[#FFDAD6] hover:text-[#BA1A1A] transition-colors group ${ isCollapsed ? "justify-center" : "" }` }
-                        >
-                            <LogOut size={ 24 } />
-                            { !isCollapsed && <span className="font-bold">Sign Out</span> }
-                        </button>
+                </div>
 
-                        <button
-                            onClick={ () => setIsCollapsed( !isCollapsed ) }
-                            className="w-full flex items-center justify-center mt-2 p-2 text-slate-300 hover:text-slate-600"
-                        >
-                            <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
-                        </button>
-                    </div>
+                {/* Footer / User Profile */}
+                <div className="p-4 border-t border-slate-100 bg-slate-50/30">
+                     <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
+                        <div className="w-9 h-9 rounded-full bg-slate-200 overflow-hidden shrink-0 border border-slate-200">
+                             <img src={user?.image || `https://ui-avatars.com/api/?name=${user?.name}`} alt="User" className="w-full h-full object-cover" />
+                        </div>
+                        
+                        {!isCollapsed && (
+                             <div className="flex-1 min-w-0">
+                                 <p className="text-sm font-semibold text-slate-900 truncate">{user?.name}</p>
+                                 <p className="text-xs text-slate-500 truncate">{user?.role || "Agent"}</p>
+                             </div>
+                        )}
+                        
+                        {!isCollapsed && (
+                             <button onClick={handleLogout} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Sign Out">
+                                 <LogOut size={16} />
+                             </button>
+                        )}
+                     </div>
+
+                     {/* Collapse Toggle */}
+                     <button 
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="absolute -right-3 top-24 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 shadow-sm z-50"
+                     >
+                         <ChevronRight size={14} className={`transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
+                     </button>
                 </div>
             </motion.aside>
 
@@ -122,7 +131,6 @@ export default function DashboardLayout ( { children } )
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <>
-                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -130,58 +138,49 @@ export default function DashboardLayout ( { children } )
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 md:hidden"
                         />
-                        
-                        {/* Drawer */}
                         <motion.aside
                             initial={{ x: "-100%" }}
                             animate={{ x: 0 }}
                             exit={{ x: "-100%" }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="fixed top-0 left-0 bottom-0 w-[280px] bg-[#F2F6FC] z-50 md:hidden shadow-2xl flex flex-col"
+                            className="fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 md:hidden shadow-2xl flex flex-col"
                         >
-                            {/* Drawer Header */}
-                            <div className="p-6 flex items-center justify-between">
-                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-[#D3E3FD] flex items-center justify-center shrink-0 text-indigo-900 shadow-inner">
-                                        <span className="font-black text-lg">B</span>
+                            <div className="h-20 flex items-center justify-between px-6 border-b border-slate-100">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
+                                        <span className="font-bold text-sm">B</span>
                                     </div>
-                                    <span className="font-bold text-lg text-[#1F1F1F] tracking-tight">BKC Admin</span>
+                                    <span className="font-bold text-base text-slate-900">Console</span>
                                 </div>
-                                <button 
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="p-2 text-slate-400 hover:bg-slate-200 rounded-full transition-colors"
-                                >
+                                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-400 hover:bg-slate-50 rounded-lg">
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            {/* Drawer Items */}
-                            <div className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
+                            <div className="flex-1 overflow-y-auto p-4 space-y-1">
                                 {navItems.map((item) => (
-                                    <Link 
-                                        key={item.path} 
+                                    <Link
+                                        key={item.path}
                                         to={item.path}
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
-                                        <div className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
-                                            location.pathname === item.path
-                                                ? "bg-indigo-100 text-indigo-900" 
-                                                : "text-slate-500 hover:bg-slate-100"
-                                        }`}>
-                                            <item.icon size={24} strokeWidth={location.pathname === item.path ? 2.5 : 2} />
-                                            <span className="font-bold text-sm tracking-wide">{item.label}</span>
+                                        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${location.pathname === item.path
+                                                ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10"
+                                                : "text-slate-500 hover:bg-slate-50 font-medium"
+                                            }`}>
+                                            <item.icon size={20} strokeWidth={location.pathname === item.path ? 2 : 1.5} />
+                                            <span className="text-sm font-medium">{item.label}</span>
                                         </div>
                                     </Link>
                                 ))}
                             </div>
 
-                            {/* Drawer Footer */}
-                            <div className="p-4 mt-auto">
+                            <div className="p-4 border-t border-slate-100 bg-slate-50/50">
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center gap-3 w-full px-4 py-4 rounded-xl text-slate-500 hover:bg-[#FFDAD6] hover:text-[#BA1A1A] transition-colors font-bold"
+                                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-200 transition-colors font-medium text-sm"
                                 >
-                                    <LogOut size={24} />
+                                    <LogOut size={16} />
                                     <span>Sign Out</span>
                                 </button>
                             </div>
@@ -190,56 +189,38 @@ export default function DashboardLayout ( { children } )
                 )}
             </AnimatePresence>
 
-            {/* --- MAIN CONTENT --- */ }
+            {/* --- MAIN CONTENT --- */}
             <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
 
-                {/* Top Bar (Floating Style) */ }
-                <header className="h-20 md:h-24 px-4 md:px-8 flex items-center justify-between shrink-0 transition-all">
-                    {/* Left Side including Mobile Toggle */}
-                    <div className="flex items-center gap-3 md:gap-0">
-                         {/* Mobile Toggle Button */}
-                        <button 
+                {/* Top Bar (Simplified) */}
+                <header className="h-20 px-6 md:px-10 flex items-center justify-between shrink-0 bg-white/50 backdrop-blur-sm border-b border-slate-200/50 sticky top-0 z-40">
+                    <div className="flex items-center gap-4">
+                        <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100/80 rounded-full transition-colors"
+                            className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
                         >
                             <Menu size={24} />
                         </button>
-
-                        <div className="flex flex-col">
-                            <h1 className="text-2xl md:text-3xl font-normal text-[#1F1F1F] tracking-tight flex items-center gap-2">
-                                { navItems.find( i => i.path === location.pathname )?.label || "Dashboard" }
-                            </h1>
-                        </div>
+                        <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                            {navItems.find(i => i.path === location.pathname)?.label || "Dashboard"}
+                        </h1>
                     </div>
 
-                    {/* Actions Pill */ }
-                    <div className="flex items-center gap-3 bg-white p-2 pr-2 md:pr-6 md:pl-2 rounded-full shadow-sm">
-
-                        {/* Search (Hide on small mobile?) */}
-                        <div className="hidden md:flex items-center bg-[#F2F6FC] rounded-full px-4 py-2 w-64 focus-within:ring-2 ring-indigo-200 transition-all">
-                            <Search size={ 20 } className="text-slate-400 mr-2" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                className="bg-transparent border-none outline-none text-sm text-[#1F1F1F] placeholder:text-slate-400 w-full font-medium"
-                            />
-                        </div>
-
-                        {/* User User */}
-                        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm ml-0 md:ml-2">
-                            <img src={ user?.image } alt="User" className="w-full h-full object-cover" />
+                    <div className="flex items-center gap-4">
+                        <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors relative">
+                            <Bell size={20} />
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
+                        </button>
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 bg-slate-100">
+                             <img src={user?.image || `https://ui-avatars.com/api/?name=${user?.name}`} alt="User" className="w-full h-full object-cover" />
                         </div>
                     </div>
                 </header>
 
-                {/* Content Area */ }
-                <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 scroll-smooth">
-                    {/* 
-                        Use a large container with rounded corners for the "Page Card" look 
-                        typical of modern tablet UIs.
-                    */}
-                    <div className="max-w-[1600px] mx-auto min-h-full">
-                        { children }
+                {/* Content Area */}
+                <div className="flex-1 overflow-y-auto px-6 md:px-10 py-8 scroll-smooth">
+                    <div className="max-w-7xl mx-auto">
+                        {children}
                     </div>
                 </div>
 
