@@ -5,6 +5,7 @@ import { ChevronLeft, ShieldCheck, Loader2, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { members } from '../lib/data';
+import logo from '../assets/images/grp_bit/Logo.png';
 
 export default function Login ()
 {
@@ -79,15 +80,17 @@ export default function Login ()
                     <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none"></div>
 
                     <div className="relative z-10 w-full">
-                        <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center p-0.5 shadow-xl shadow-indigo-500/10 mb-6 lg:mb-8 border border-white/40">
-                            <div className="bg-white/40 w-full h-full rounded-[14px] flex items-center justify-center border border-white/50">
-                                <span className="font-bold text-lg lg:text-xl text-white drop-shadow-md">B</span>
-                            </div>
+                        <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-xl shadow-indigo-500/10 mb-6 lg:mb-8 border border-white/40 overflow-hidden">
+                            <img src={ logo } alt="Logo" className="w-full h-full object-cover" />
                         </div>
-                        <h1 className="text-3xl lg:text-5xl font-black font-display tracking-tight leading-tight mb-4 lg:mb-6 text-white drop-shadow-sm">
-                            Secure <br />
-                            <span className="text-white drop-shadow-md">Access Point.</span>
-                        </h1>
+
+                        <span>
+                            <h1 className="text-3xl lg:text-5xl font-black font-display tracking-tight leading-tight mb-4 lg:mb-6 text-white drop-shadow-sm">
+                                Welcome to the <br />
+                                <span className="text-white drop-shadow-md">BKC Command Center</span>
+                            </h1>
+                        </span>
+
                         <p className="text-white/90 text-sm lg:text-lg leading-relaxed max-w-sm font-medium drop-shadow-sm hidden md:block">
                             Identify yourself to access the command center.
                         </p>

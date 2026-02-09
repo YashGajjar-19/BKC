@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import
-    {
-        Github, Twitter, Instagram, Heart,
-        ArrowUpRight, Globe, Zap
-    } from "lucide-react";
+import {
+    Github, Twitter, Instagram, Heart,
+    ArrowUpRight, Globe, Zap
+} from "lucide-react";
+import logo from '../../assets/images/grp_bit/Logo.png';
 
 export default function Footer ()
 {
@@ -57,9 +57,9 @@ export default function Footer ()
                             initial={ { opacity: 0, y: 20 } }
                             whileInView={ { opacity: 1, y: 0 } }
                             viewport={ { once: true } }
-                            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20"
+                            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden"
                         >
-                            <span className="text-2xl font-black text-white">B</span>
+                            <img src={logo} alt="Logo" className="w-full h-full object-cover" />
                         </motion.div>
 
                         <div>
