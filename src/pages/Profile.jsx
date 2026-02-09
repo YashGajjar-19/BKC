@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, DollarSign, Sparkles, Briefcase, User, Target, CheckCircle2, Clock, Image, Edit2, Save, X } from "lucide-react";
+import { members } from "../lib/data";
 import { collection, query, where, getDocs, orderBy, doc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
@@ -11,17 +12,15 @@ export default function Profile ()
 {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user, members } = useAuth(); // Get global members state
+    const { user } = useAuth();
     const [ missions, setMissions ] = useState( [] );
     const [ loading, setLoading ] = useState( true );
-    
+
     // Edit Mode State (for admins)
     const [ isEditing, setIsEditing ] = useState( false );
     const [ newEmail, setNewEmail ] = useState( "" );
     const [ isSaving, setIsSaving ] = useState( false );
-
     // Find member by ID (ensure type safety with parseInt)
-    // Use the dynamic 'members' not the static one
     const member = members.find( ( m ) => m.id === parseInt( id ) );
 
     // Initialize editing state

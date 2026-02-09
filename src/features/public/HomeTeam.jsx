@@ -2,11 +2,11 @@
 import { motion } from "framer-motion";
 import { Sparkles, Crown, ArrowUpRight, Zap, ArrowRight, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { members } from "../../lib/data";
 
 export default function HomeTeam() {
   const navigate = useNavigate();
-  const { members } = useAuth();
+
 
   // Helper to determine grid span
   const getGridSpan = (index) => {

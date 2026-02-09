@@ -1,71 +1,82 @@
-// src/features/public/Hero.jsx
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
+import groupSelfie from "../../assets/images/grp_bit/Group.png";
 
 export default function Hero() {
     return (
-        <section className="relative h-screen min-h-[850px] flex items-center justify-center overflow-hidden bg-slate-50">
+        <section className="relative h-screen min-h-[800px] w-full flex flex-col items-center overflow-hidden bg-white">
 
-            <div className="max-w-7xl mx-auto px-6 text-center space-y-10 relative z-10">
+            {/* --- Background Ambient (Subtle) --- */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(120,119,198,0.1),transparent_50%)]" />
 
+            {/* --- Main Content Container --- */}
+            <div className="relative z-10 w-full max-w-[1600px] px-6 flex flex-col items-center h-full pt-20 md:pt-28">
+
+                {/* 1. Badge (More Premium, Less Gadgety) */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-indigo-100 shadow-sm transition-transform hover:scale-105 cursor-default"
+                    transition={{ duration: 0.6 }}
+                    className="mb-6"
                 >
-                    <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
-                    </span>
-                    <span className="text-xs font-bold uppercase tracking-widest text-indigo-900">
-                        The Bakchodi International
+                    <span className="px-5 py-2 rounded-full border border-slate-200 bg-white/50 backdrop-blur-sm text-slate-500 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm">
+                        Est. 2026 • The Bakchodi International
                     </span>
                 </motion.div>
 
+                {/* 2. Headline (Magazine Style - Massive & Tight) */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1, duration: 0.6 }}
+                    transition={{ delay: 0.1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    className="text-center relative z-20"
                 >
-                    <h1 className="text-7xl md:text-9xl font-black text-slate-900 tracking-tighter leading-[0.9] mb-4">
-                        SERIOUSLY <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 animate-gradient-x">
+                    <h1 className="text-[12vw] md:text-[8rem] lg:text-[10rem] font-black text-slate-900 leading-[0.85] tracking-tighter flex flex-col items-center select-none">
+                        <span className="block">SERIOUSLY</span>
+                        <span className="block text-transparent bg-clip-text bg-gradient-to-b from-indigo-500 to-indigo-700 opacity-90">
                             UNSERIOUS.
                         </span>
                     </h1>
                 </motion.div>
-                
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.6 }}
-                    className="text-xl md:text-2xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed"
-                >
-                    Pioneering the future of organized chaos since 2026. 
-                    <br className="hidden md:block" />
-                    We build things that break things, beautifully.
-                </motion.p>
 
+                {/* 3. Subtext & CTA (positioned well above the potential image head-level) */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                    className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                    className="mt-8 md:mt-10 flex flex-col items-center gap-8 relative z-30"
                 >
-                    <button className="group relative px-8 py-4 bg-slate-900 text-white rounded-full font-bold text-lg overflow-hidden transition-all hover:shadow-2xl hover:shadow-indigo-500/30 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <span className="relative z-10 flex items-center gap-2">
-                            Start Chaos <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                        </span>
-                    </button>
-                    
-                    <button className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-bold text-lg hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm hover:shadow-xl hover:-translate-y-1">
-                        View The Team
-                    </button>
+                    <p className="hidden md:block text-slate-500 font-medium text-lg max-w-xl text-center leading-relaxed">
+                        We are the architects of chaos. The engineers of entropy. <br/>
+                        Building the future, one broken rule at a time.
+                    </p>
                 </motion.div>
             </div>
+
+            {/* --- Hero Image (Full Width, Bottom Anchor) --- */}
+            {/* Optimized for layout: Anchored bottom, absolute, taking full width. z-index managed to sit nicely. */}
+            <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: "0%" }}
+                transition={{ delay: 0.2, duration: 1, type: "spring", damping: 20, stiffness: 90 }}
+                className="absolute bottom-0 left-0 right-0 w-full z-10 flex justify-center pointer-events-none"
+            >
+                {/* 
+                    Image Logic:
+                    - w-full: Spans entire screen width (User Request)
+                    - object-cover: Ensures no whitespace on sides
+                    - object-[center_top]: Focuses on the faces, crops bottom of shirts if needed
+                    - max-h to prevent hiding the text completely on small screens
+                */}
+                <img 
+                    src={groupSelfie} 
+                    alt="Team Group Selfie" 
+                    className="w-full h-[55vh] md:h-[65vh] lg:h-[80vh] object-cover object-top drop-shadow-2xl"
+                />
+            </motion.div>z
             
+            {/* Optional Gradient Overlay at bottom to blend image if it's not a perfect cutout, 
+                or to add depth. Removed for now to keep it clean 'magazine' style per user feedback. */}
         </section>
     );
 }

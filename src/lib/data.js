@@ -4,8 +4,8 @@ import bhavyImg from "../assets/images/per_bit/Bhavy.png";
 import drashtiImg from "../assets/images/per_bit/Drashti.png";
 import preetImg from "../assets/images/per_bit/Preet.png";
 import dhruviImg from "../assets/images/per_bit/Dhruvi.png";
-// import vaishaliImg from "../assets/images/per_bit/Vaishali.png";
-// import riddhiImg from "../assets/images/per_bit/Riddhi.png";
+import vaishaliImg from "../assets/images/per_bit/Vaishali.png";
+import riddhiImg from "../assets/images/per_bit/Riddhi.png";
 
 
 export const companyDetails = {
@@ -186,7 +186,7 @@ export const members = [
         posts: "Finance Manager",
         email: "vaishali@bkc.com",
         authEmail: "", // TODO: Add real Gmail here
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Vaishali&backgroundColor=ffdfbf",
+        image: vaishaliImg  ,
         isAdmin: true
     },
     {
@@ -201,7 +201,7 @@ export const members = [
         posts: "Security Manager",
         email: "riddhi@bkc.com",
         authEmail: "", // TODO: Add real Gmail here
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Riddhi&backgroundColor=b6e3f4",
+        image: riddhiImg,
         isAdmin: true
     },
 ];
