@@ -1,11 +1,12 @@
 // src/features/public/HomeTeam.jsx
 import { motion } from "framer-motion";
-import { members } from "../../lib/data";
 import { Sparkles, Crown, ArrowUpRight, Zap, ArrowRight, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function HomeTeam() {
   const navigate = useNavigate();
+  const { members } = useAuth();
 
   // Helper to determine grid span
   const getGridSpan = (index) => {
@@ -73,7 +74,7 @@ export default function HomeTeam() {
                 transition={{ delay: idx * 0.1, duration: 0.5, type: 'spring', bounce: 0.3 }}
                 onClick={() => navigate(`/profile/${member.id}`)}
                 whileHover={{ y: -8, scale: 1.01 }}
-                className={`group relative rounded-[2.5rem] flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-100 ${gridSpan} ${bgClass}`}
+                className={`group relative rounded-[2.5rem] flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 ${gridSpan} ${bgClass}`}
               >
                 
                 {/* --- IMAGE LAYER --- */}
@@ -89,11 +90,7 @@ export default function HomeTeam() {
                    <img 
                      src={member.image} 
                      alt={member.name}
-                     className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-110 ${
-                       idx === 0 
-                        ? 'object-top' // Founder: Focus on top/center
-                        : 'object-center md:object-cover scale-[0.85] translate-y-4 group-hover:translate-y-2' // Others: Slightly smaller to fit frame, move up on hover
-                     } ${
+                     className={`w-full h-full object-cover transition-all duration-700 ease-out ${
                         // Refined Grayscale Logic: Color by default, vivid on hover.
                         // Or if user insists on grayscale:
                         // 'grayscale-[0.5] group-hover:grayscale-0' // Subtle grayscale

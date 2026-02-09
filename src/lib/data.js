@@ -1,5 +1,12 @@
 // src/data.js
 import yashImg from "../assets/images/per_bit/Yash.png";
+import bhavyImg from "../assets/images/per_bit/Bhavy.png";
+import drashtiImg from "../assets/images/per_bit/Drashti.png";
+import preetImg from "../assets/images/per_bit/Preet.png";
+import dhruviImg from "../assets/images/per_bit/Dhruvi.png";
+// import vaishaliImg from "../assets/images/per_bit/Vaishali.png";
+// import riddhiImg from "../assets/images/per_bit/Riddhi.png";
+
 
 export const companyDetails = {
     name: "Bakchodi International PVT. LTD.",
@@ -99,12 +106,12 @@ export const members = [
         name: "Yash Gajjar",
         role: "Founder & Admin",
         title: "The Founder",
-        dob: "19 July 2005",
+        dob: "19 July, 2005",
         age: "21",
-        salary: "$1,200,000",
+        salary: "$1000 Quadrillion",
         posts: "Founder and Admin",
         description: "The mastermind behind the chaos.",
-        email: "[EMAIL_ADDRESS]",
+        email: "gajjaryash195@gmail.com",
         image: yashImg,
         isAdmin: true,
     },
@@ -115,11 +122,11 @@ export const members = [
         title: "The CFO",
         dob: "19 August, 2006",
         age: "20",
-        salary: "$950,000",
+        salary: "$950 Quadrillion",
         posts: "Founder and CFO",
         description: "Bhavy manages the funds, which mostly involves buying premium coffee and denying our expense reports for 'Prank Supplies'.",
         email: "[EMAIL_ADDRESS]",
-        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Bhavy&backgroundColor=c0aede",
+        image: bhavyImg,
         isAdmin: true,
     },
     {
@@ -127,39 +134,74 @@ export const members = [
         name: "Drashti Bhatia",
         role: "General Manager & HR Head",
         title: "The Manager",
+        dob: "14 February, 2004",
+        age: "22",
+        salary: "$800 Quadrillion",
         description: "Second in command. Manages operations and HR with strict efficiency.",
-        posts: "General Manager & HR Head"
+        posts: "General Manager & HR Head",
+        email: "drashti@bkc.com",
+        authEmail: "", // TODO: Add real Gmail here (e.g., 'drashti123@gmail.com')
+        image: drashtiImg,
+        isAdmin: true
     },
     {
         id: 4,
         name: "Preet Malde",
         role: "Head of Security",
         title: "The Tank",
+        dob: "05 November, 2004",
+        age: "22",
+        salary: "$780 Quadrillion",
         description: "Controls the security team. Ensures total asset protection.",
-        posts: "Head of Security"
+        posts: "Head of Security",
+         email: "preet@bkc.com",
+         authEmail: "",
+        image: preetImg,
+        isAdmin: true
     },
     {
         id: 5,
         name: "Dhruvi Vashiyar",
         role: "Manager (A-Z Dept) & Designer",
         title: "Creative Chaos",
+        dob: "22 March, 2005",
+        age: "21",
+        salary: "$550 Quadrillion",
         description: "Creative powerhouse. Designing chaos into art one pixel at a time.",
-        posts: "Manager & Designer"
+        posts: "Manager & Designer",
+        email: "dhruvi@bkc.com",
+        authEmail: "", // TODO: Add real Gmail here
+        image: dhruviImg,
+        isAdmin: true
     },
     {
         id: 6,
         name: "Vaishali Chavda",
         role: "Finance Manager",
         title: "Number Cruncher",
+        dob: "10 September, 2003",
+        age: "23",
+        salary: "$650 Quadrillion",
         description: "Handles accounts and tax compliance with precision.",
-        posts: "Finance Manager"
+        posts: "Finance Manager",
+        email: "vaishali@bkc.com",
+        authEmail: "", // TODO: Add real Gmail here
+        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Vaishali&backgroundColor=ffdfbf",
+        isAdmin: true
     },
     {
         id: 7,
         name: "Riddhi Kaloliya",
         role: "Security Manager",
         title: "The Annoyer",
+        dob: "08 December, 2004",
+        age: "22",
+        salary: "$450 Quadrillion",
         description: "Expert in surveillance and asset monitoring.",
-        posts: "Security Manager"
+        posts: "Security Manager",
+        email: "riddhi@bkc.com",
+        authEmail: "", // TODO: Add real Gmail here
+        image: "https://api.dicebear.com/9.x/avataaars/svg?seed=Riddhi&backgroundColor=b6e3f4",
+        isAdmin: true
     },
 ];

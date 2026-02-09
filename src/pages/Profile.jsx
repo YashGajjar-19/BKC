@@ -2,20 +2,52 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, DollarSign, Sparkles, Briefcase, User, Target, CheckCircle2, Clock, Image } from "lucide-react";
-import { members } from "../lib/data";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { ArrowLeft, Calendar, DollarSign, Sparkles, Briefcase, User, Target, CheckCircle2, Clock, Image, Edit2, Save, X } from "lucide-react";
+import { collection, query, where, getDocs, orderBy, doc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { useAuth } from "../context/AuthContext";
 
 export default function Profile ()
 {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user, members } = useAuth(); // Get global members state
     const [ missions, setMissions ] = useState( [] );
     const [ loading, setLoading ] = useState( true );
+    
+    // Edit Mode State (for admins)
+    const [ isEditing, setIsEditing ] = useState( false );
+    const [ newEmail, setNewEmail ] = useState( "" );
+    const [ isSaving, setIsSaving ] = useState( false );
 
     // Find member by ID (ensure type safety with parseInt)
+    // Use the dynamic 'members' not the static one
     const member = members.find( ( m ) => m.id === parseInt( id ) );
+
+    // Initialize editing state
+    useEffect(() => {
+        if (member) setNewEmail(member.email || "");
+    }, [member]);
+
+    const handleUpdateEmail = async () => {
+        if (!newEmail || !member) return;
+        setIsSaving(true);
+        try {
+            const memberRef = doc(db, "members", String(member.id));
+            await updateDoc(memberRef, { email: newEmail });
+            // Ideally should update local state via context refresh, but for now strict reload or optimistic update needed?
+            // Since context fetches on mount, we might need to rely on the fact that if we update DB,
+            // next refresh will be correct. For immediate UI feedback, we should update locally or reload.
+            alert("Email updated successfully! The user needs to re-login.");
+            setIsEditing(false);
+            window.location.reload(); // Simple way to refresh context
+        } catch (error) {
+            console.error("Error updating email:", error);
+            alert("Failed to update email.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     // Fetch Member's Missions
     useEffect( () =>
@@ -115,6 +147,36 @@ export default function Profile ()
                                     <Briefcase size={ 14 } className="text-indigo-300" />
                                     <span className="text-xs font-bold uppercase tracking-widest">{ member.role }</span>
                                 </div>
+                                { /* Admin Controls to Edit Email */ }
+                                { user?.isAdmin && (
+                                    <div className="mt-4">
+                                        { isEditing ? (
+                                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-2 rounded-lg border border-white/20">
+                                                <input 
+                                                    type="email" 
+                                                    value={newEmail}
+                                                    onChange={(e) => setNewEmail(e.target.value)}
+                                                    className="bg-transparent text-white placeholder-white/50 text-xs font-bold w-full outline-none"
+                                                    placeholder="Enter Google Email"
+                                                />
+                                                <button onClick={handleUpdateEmail} disabled={isSaving} className="p-1 hover:bg-white/20 rounded-full transition-colors text-emerald-400">
+                                                    <Save size={14} />
+                                                </button>
+                                                <button onClick={() => setIsEditing(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors text-rose-400">
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button 
+                                                onClick={() => setIsEditing(true)}
+                                                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-indigo-200 hover:text-white transition-colors"
+                                            >
+                                                <Edit2 size={12} /> Edit Email Access
+                                            </button>
+                                        )}
+                                        <p className="text-[10px] text-white/50 mt-1 font-mono">{member.email}</p>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
 
@@ -128,8 +190,8 @@ export default function Profile ()
                             </div>
                             <div>
                                 <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Born On</p>
-                                <p className="text-xl font-black text-slate-900 leading-tight">{ member.dob.split( ',' )[ 0 ] }</p>
-                                <p className="text-xs font-bold text-slate-500">{ member.dob.split( ',' )[ 1 ] }</p>
+                                <p className="text-xl font-black text-slate-900 leading-tight">{ member.dob?.split( ',' )[ 0 ] || 'Unknown' }</p>
+                                <p className="text-xs font-bold text-slate-500">{ member.dob?.split( ',' )[ 1 ] || '' }</p>
                             </div>
                         </motion.div>
 
