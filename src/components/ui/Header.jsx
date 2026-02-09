@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { Menu, X, Rocket, Users, Globe, ArrowUpRight, MessageSquare } from 'lucide-react';
+import logo from '../../assets/images/grp_bit/Logo.png';
 
 export default function Header() {
     const { user } = useAuth();
@@ -67,8 +68,9 @@ export default function Header() {
                             !scrolled ? 'bg-white/30 backdrop-blur-md border border-white/20 shadow-sm hover:bg-white/50' : ''
                         }`}
                     >
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center font-black text-lg group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-lg shadow-indigo-500/20">
-                            B
+
+                        <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-lg shadow-indigo-500/20 overflow-hidden">
+                            <img src={logo} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col leading-none">
                             <span className="font-black text-slate-900 tracking-tight text-sm">BAKCHODI</span>
@@ -161,7 +163,9 @@ export default function Header() {
                         >
                             <div className="flex items-center justify-between mb-8">
                                 <div className="flex items-center gap-3">
-                                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-indigo-500/30">B</div>
+                                     <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-indigo-500/30 overflow-hidden">
+                                         <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+                                     </div>
                                      <span className="font-black text-xl text-slate-900 tracking-tight">Navigation</span>
                                 </div>
                                 <button onClick={() => setMobileMenuOpen(false)} className="p-3 bg-slate-50 rounded-full hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 transition-colors">

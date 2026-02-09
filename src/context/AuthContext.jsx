@@ -11,7 +11,12 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { members } from "../lib/data";
 
-const AuthContext = createContext();
+const AuthContext = createContext({
+    user: null,
+    loading: true,
+    loginWithGoogle: async () => ({ success: false, error: "Auth check not ready." }),
+    logout: async () => {},
+});
 
 export const AuthProvider = ( { children } ) =>
 {
@@ -24,6 +29,9 @@ export const AuthProvider = ( { children } ) =>
         try
         {
             const provider = new GoogleAuthProvider();
+            // Force account selection to avoid auto-picking wrong account
+            provider.setCustomParameters({ prompt: 'select_account' });
+            
             const result = await signInWithPopup( auth, provider );
             const googleUser = result.user;
 
@@ -31,9 +39,19 @@ export const AuthProvider = ( { children } ) =>
             if ( selectedMemberId )
             {
                 const selectedMember = members.find( m => m.id === selectedMemberId );
+                
+                // Allow login if:
+                // 1. Email matches standard 'email' field
+                // 2. Email matches secret 'authEmail' field
+                // 3. The config has a placeholder/empty email (Dev Bypass)
+                const isAuthorized = 
+                    googleUser.email === selectedMember.email || 
+                    googleUser.email === selectedMember.authEmail ||
+                    selectedMember.email === "" ||
+                    selectedMember.email === "[EMAIL_ADDRESS]";
 
                 // Strict Email Check for Core Team
-                if ( googleUser.email === selectedMember.email )
+                if ( isAuthorized )
                 {
                     const mergedUser = {
                         ...googleUser,
@@ -48,7 +66,7 @@ export const AuthProvider = ( { children } ) =>
                     await signOut( auth );
                     return {
                         success: false,
-                        error: `Identity Mismatch! This profile belongs to ${ selectedMember.email }.`
+                        error: `Identity Mismatch! This profile is linked to ${selectedMember.authEmail || selectedMember.email || "a different account"}. Your email: ${googleUser.email}`
                     };
                 }
             }
@@ -85,7 +103,15 @@ export const AuthProvider = ( { children } ) =>
         } catch ( error )
         {
             console.error( "Login Error:", error );
-            return { success: false, error: error.message };
+            // Helper to return cleaner error messages
+            let errorMessage = error.message;
+            if (error.code === 'auth/popup-closed-by-user') {
+                errorMessage = "Login cancelled. You closed the popup.";
+            } else if (error.code === 'auth/popup-blocked') {
+                errorMessage = "Login popup blocked. Please allow popups.";
+            }
+
+            return { success: false, error: errorMessage };
         }
     };
 
@@ -118,8 +144,6 @@ export const AuthProvider = ( { children } ) =>
                     } else
                     {
                         // If valid Google session but no Firestore data (rare edge case),
-                        // we can either auto-create here or logout. 
-                        // For safety, let's logout and make them click "Login" again to trigger creation.
                         signOut( auth );
                         setUser( null );
                     }
@@ -133,11 +157,27 @@ export const AuthProvider = ( { children } ) =>
         return () => unsubscribe();
     }, [] );
 
+    // Keep Provider mounted but show loader if checking auth status
+    if (loading) {
+        return (
+            <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-900 text-white gap-4">
+               <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+               <p className="text-sm font-bold uppercase tracking-widest text-indigo-400">Initializing System...</p>
+            </div>
+        );
+    }
+
     return (
         <AuthContext.Provider value={ { user, loginWithGoogle, logout, loading } }>
-            { !loading && children }
+            { children }
         </AuthContext.Provider>
     );
 };
 
-export const useAuth = () => useContext( AuthContext );
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
+};

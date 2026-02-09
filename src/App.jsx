@@ -6,6 +6,8 @@ import Profile from "./pages/Profile";
 import Overview from "./features/dashboard/Overview";
 import Missions from "./features/dashboard/Missions";
 import CommChannel from "./features/dashboard/Chat/CommChannel";
+import Team from "./features/dashboard/Team";
+import Settings from "./features/dashboard/Settings";
 import DashboardLayout from "./components/layouts/DashboardLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicLayout from "./components/layouts/PublicLayout";
@@ -35,6 +37,8 @@ export default function App ()
                 <Routes>
                   <Route index element={ <Overview /> } />
                   <Route path="missions" element={ <Missions /> } />
+                  <Route path="team" element={ <Team /> } />
+                  <Route path="settings" element={ <Settings /> } />
                 </Routes>
               </DashboardLayout>
             </ProtectedRoute>

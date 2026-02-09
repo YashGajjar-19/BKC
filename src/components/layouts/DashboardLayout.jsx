@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, Users, Zap, Settings, LogOut, Search, Menu, X, Globe, ChevronRight, MessageSquare, Bell } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import logo from "../../assets/images/grp_bit/Logo.png";
 
 const NavItem = ({ icon: Icon, label, path, isActive, isCollapsed }) => (
     <Link to={path} title={isCollapsed ? label : ""}>
@@ -55,8 +56,8 @@ export default function DashboardLayout({ children }) {
                 {/* Header / Logo */}
                 <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-6'} h-20 border-b border-slate-100/50`}>
                     <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shrink-0 text-white shadow-md shadow-slate-900/10 transition-transform group-hover:scale-105">
-                            <span className="font-bold text-sm">B</span>
+                        <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center shrink-0 text-white shadow-md shadow-slate-900/10 transition-transform group-hover:scale-105 overflow-hidden">
+                            <img src={logo} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         {!isCollapsed && (
                             <div className="flex flex-col">
@@ -131,54 +132,82 @@ export default function DashboardLayout({ children }) {
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <>
+                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 md:hidden"
+                            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] md:hidden"
                         />
+                        {/* Drawer */}
                         <motion.aside
                             initial={{ x: "-100%" }}
                             animate={{ x: 0 }}
                             exit={{ x: "-100%" }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 md:hidden shadow-2xl flex flex-col"
+                            className="fixed top-0 left-0 bottom-0 w-[280px] bg-white z-[70] md:hidden shadow-2xl flex flex-col border-r border-slate-100"
                         >
-                            <div className="h-20 flex items-center justify-between px-6 border-b border-slate-100">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
-                                        <span className="font-bold text-sm">B</span>
+                            <div className="h-20 flex items-center justify-between px-6 border-b border-slate-100 shrink-0">
+                                <Link to="/" className="flex items-center gap-3" onClick={() => setIsMobileMenuOpen(false)}>
+                                    <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-md overflow-hidden">
+                                        <img src={logo} alt="Logo" className="w-full h-full object-cover" />
                                     </div>
-                                    <span className="font-bold text-base text-slate-900">Console</span>
-                                </div>
-                                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-400 hover:bg-slate-50 rounded-lg">
+                                    <span className="font-bold text-lg text-slate-900 tracking-tight">Console</span>
+                                </Link>
+                                <button 
+                                    onClick={() => setIsMobileMenuOpen(false)} 
+                                    className="p-2 -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                                >
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-4 space-y-1">
-                                {navItems.map((item) => (
-                                    <Link
-                                        key={item.path}
-                                        to={item.path}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${location.pathname === item.path
-                                                ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10"
-                                                : "text-slate-500 hover:bg-slate-50 font-medium"
+                            <div className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-2 opacity-80 mt-2">Menu</div>
+                                {navItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive = location.pathname === item.path;
+                                    return (
+                                        <Link
+                                            key={item.path}
+                                            to={item.path}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="block"
+                                        >
+                                            <div className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all ${
+                                                isActive
+                                                    ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
+                                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium"
                                             }`}>
-                                            <item.icon size={20} strokeWidth={location.pathname === item.path ? 2 : 1.5} />
-                                            <span className="text-sm font-medium">{item.label}</span>
-                                        </div>
-                                    </Link>
-                                ))}
+                                                <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
+                                                <span className="text-sm font-medium">{item.label}</span>
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
+
+                                <div className="my-6 border-t border-slate-100/50"></div>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-2 opacity-80">Quick Access</div>
+                                
+                                <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="block">
+                                    <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors font-medium">
+                                        <Globe size={20} strokeWidth={1.5} />
+                                        <span className="text-sm">Public Site</span>
+                                    </div>
+                                </Link>
+                                <Link to="/chat" onClick={() => setIsMobileMenuOpen(false)} className="block">
+                                    <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors font-medium">
+                                        <MessageSquare size={20} strokeWidth={1.5} />
+                                        <span className="text-sm">Comm Channel</span>
+                                    </div>
+                                </Link>
                             </div>
 
-                            <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+                            <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0 safe-area-bottom">
                                 <button
-                                    onClick={handleLogout}
-                                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-200 transition-colors font-medium text-sm"
+                                    onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-200 transition-colors font-bold text-sm shadow-sm"
                                 >
                                     <LogOut size={16} />
                                     <span>Sign Out</span>

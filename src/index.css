@@ -16,3 +16,29 @@
     @apply font-display tracking-tight;
   }
 }
+
+/* Custom Scrollbar for 'Pixel 17' Aesthetic */
+::-webkit-scrollbar {
+  width: 8px; /* Slimmer for modern look */
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9; /* slate-100 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #6366f1, #a855f7); /* indigo-500 to purple-500 */
+  border-radius: 9999px; /* Pill shape */
+  border: 2px solid #f1f5f9; /* Adds padding effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4f46e5; /* indigo-600 */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6366f1 #f1f5f9;
+}
