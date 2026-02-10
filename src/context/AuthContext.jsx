@@ -35,11 +35,15 @@ export const AuthProvider = ( { children } ) =>
             const result = await signInWithPopup( auth, provider );
             const googleUser = result.user;
 
+            let finalUserData = null;
+
             // SCENARIO A: Core Team Login (Selected from Grid)
             if ( selectedMemberId )
             {
                 const selectedMember = members.find( m => m.id === selectedMemberId );
                 
+                if (!selectedMember) throw new Error("Member profile not found.");
+
                 // Allow login if:
                 // 1. Email matches standard 'email' field
                 // 2. Email matches secret 'authEmail' field
@@ -53,14 +57,22 @@ export const AuthProvider = ( { children } ) =>
                 // Strict Email Check for Core Team
                 if ( isAuthorized )
                 {
-                    const mergedUser = {
-                        ...googleUser,
-                        ...selectedMember,
+                    finalUserData = {
                         uid: googleUser.uid,
-                        isCoreTeam: true
+                        email: googleUser.email,
+                        name: selectedMember.name, // Corrected to match app schema
+                        image: selectedMember.image, // Corrected to match app schema
+                        role: selectedMember.role,
+                        title: selectedMember.title,
+                        memberId: selectedMember.id,
+                        isCoreTeam: true,
+                        isAdmin: selectedMember.isAdmin,
+                        lastLogin: new Date().toISOString()
                     };
-                    setUser( mergedUser );
-                    return { success: true };
+
+                    // CRITICAL FIX: Persist Core Team identity to Firestore
+                    // This ensures onAuthStateChanged finds them on reload
+                    await setDoc(doc(db, "users", googleUser.uid), finalUserData, { merge: true });
                 } else
                 {
                     await signOut( auth );
@@ -79,26 +91,33 @@ export const AuthProvider = ( { children } ) =>
 
                 if ( userDoc.exists() )
                 {
+                    const userData = userDoc.data();
+                    // Self-healing: Ensure name/image exist if created with wrong schema
+                    if (!userData.name && userData.displayName) userData.name = userData.displayName;
+                    if (!userData.image && userData.photoURL) userData.image = userData.photoURL;
+                    
                     // User exists -> Log them in
-                    setUser( { ...googleUser, ...userDoc.data() } );
+                    finalUserData = { ...googleUser, ...userData };
                 } else
                 {
                     // New User -> AUTO-REGISTER (No Code Needed)
-                    const newAgentData = {
-                        name: googleUser.displayName,
+                    finalUserData = {
+                        uid: googleUser.uid,
                         email: googleUser.email,
-                        image: googleUser.photoURL,
+                        name: googleUser.displayName, // Corrected from displayName
+                        image: googleUser.photoURL,   // Corrected from photoURL
                         role: "Field Agent",
                         title: "Operative",
-                        createdAt: new Date().toISOString()
+                        createdAt: new Date().toISOString(),
+                        lastLogin: new Date().toISOString()
                     };
 
-                    await setDoc( userDocRef, newAgentData );
-                    setUser( { ...googleUser, ...newAgentData } );
+                    await setDoc( userDocRef, finalUserData );
                 }
-
-                return { success: true };
             }
+            
+            setUser( finalUserData );
+            return { success: true };
 
         } catch ( error )
         {
@@ -121,32 +140,58 @@ export const AuthProvider = ( { children } ) =>
         setUser( null );
     };
 
-    // 2. Persistent Session
+    // 2. Persistent Session Restoration
     useEffect( () =>
     {
         const unsubscribe = onAuthStateChanged( auth, async ( currentUser ) =>
         {
             if ( currentUser )
             {
-                // Check Data.js first (Core Team)
-                const staticMember = members.find( m => m.email === currentUser.email );
+                // ALWAYS check Firestore First (Unified Source of Truth)
+                const userDocRef = doc( db, "users", currentUser.uid );
+                
+                try {
+                    const userSnap = await getDoc( userDocRef );
+                    
+                    if ( userSnap.exists() )
+                    {
+                        const userData = userSnap.data();
+                        
+                        // Self-healing: Restore sessions created with broken schema
+                        if (!userData.name && userData.displayName) userData.name = userData.displayName;
+                        if (!userData.image && userData.photoURL) userData.image = userData.photoURL;
 
-                if ( staticMember )
-                {
-                    setUser( { ...currentUser, ...staticMember, isCoreTeam: true } );
-                } else
-                {
-                    // Check Firestore (General Agents)
-                    const userDoc = await getDoc( doc( db, "users", currentUser.uid ) );
-                    if ( userDoc.exists() )
+                        // Restore session with full profile data
+                        setUser( { ...currentUser, ...userData } );
+                    } 
+                    else 
                     {
-                        setUser( { ...currentUser, ...userDoc.data() } );
-                    } else
-                    {
-                        // If valid Google session but no Firestore data (rare edge case),
-                        signOut( auth );
-                        setUser( null );
+                        // Fallback: Check Data.js for hardcoded emails (Legacy Support)
+                        const staticMember = members.find( m => m.email === currentUser.email && m.email !== "" );
+
+                        if (staticMember) {
+                            const restoredUser = {
+                                ...currentUser,
+                                ...staticMember,
+                                isCoreTeam: true,
+                                memberId: staticMember.id
+                            };
+                            setUser(restoredUser);
+                            // Auto-heal: Create missing Firestore doc
+                            setDoc(userDocRef, restoredUser, { merge: true }).catch(console.error);
+                        } else {
+                            // User authenticated with Google but has no profile data (Registration pending)
+                            // DO NOT SIGN OUT HERE. 
+                            // Why? Because loginWithGoogle() might be running right now and about to write the doc.
+                            // If we sign out, we kill the login flow.
+                            // Just leave user as null or partial state until login flow completes.
+                            console.warn("User has auth session but no profile. Waiting for registration...");
+                            setUser(null); 
+                        }
                     }
+                } catch (err) {
+                    console.error("Session restore error:", err);
+                    setUser(null);
                 }
             } else
             {

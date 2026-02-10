@@ -1,13 +1,104 @@
 // src/features/dashboard/Missions.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, CheckCircle2, Trash2, ShieldAlert, Target, AlertTriangle } from "lucide-react";
+import { Plus, CheckCircle2, Trash2, ShieldAlert, Target, AlertTriangle, ChevronDown, Users, Search } from "lucide-react";
 import { collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { members } from "../../lib/data";
 
-export default function Missions() {
+// --- Custom Checkbox Dropdown ---
+const CustomDropdown = ({ label, options, value, onChange, icon: Icon, type = "text" }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+
+    // Close on click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(opt => opt.value === value);
+
+    return (
+        <div className="relative" ref={containerRef}>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1 mb-2 block">{label}</label>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full bg-slate-50 border ${isOpen ? 'border-indigo-500 ring-2 ring-indigo-500/10' : 'border-slate-200'} rounded-2xl p-4 flex items-center justify-between transition-all duration-300 group hover:border-indigo-300`}
+            >
+                <div className="flex items-center gap-3">
+                    {type === "agent" && selectedOption?.image && (
+                         <div className="w-6 h-6 rounded-full overflow-hidden border border-white shadow-sm">
+                             <img src={selectedOption.image} alt="" className="w-full h-full object-cover" />
+                         </div>
+                    )}
+                    {type === "agent" && !selectedOption?.image && selectedOption?.icon && (
+                        <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                           <selectedOption.icon size={14} />
+                        </div>
+                    )}
+                    
+                    <span className={`font-bold ${value ? 'text-slate-900' : 'text-slate-400'}`}>
+                        {selectedOption?.label || "Select..."}
+                    </span>
+                </div>
+                <div className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-indigo-500' : ''}`}>
+                    <ChevronDown size={20} />
+                </div>
+            </button>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute z-50 top-full mt-2 left-0 w-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
+                    >
+                        <div className="p-1.5 space-y-1">
+                            {options.map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                                        value === opt.value 
+                                            ? 'bg-indigo-50 text-indigo-700' 
+                                            : 'hover:bg-slate-50 text-slate-600'
+                                    }`}
+                                >
+                                    {type === "agent" && (
+                                        <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center border ${value === opt.value ? 'border-indigo-200' : 'border-slate-100'}`}>
+                                            {opt.image ? (
+                                                <img src={opt.image} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="bg-slate-100 w-full h-full flex items-center justify-center text-slate-400">
+                                                    {opt.icon ? <opt.icon size={16} /> : <Users size={16} />}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    <span className="font-bold text-sm">{opt.label}</span>
+                                    {value === opt.value && <CheckCircle2 size={16} className="ml-auto text-indigo-500" />}
+                                </button>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+export default function Tasks() {
     const { user } = useAuth();
     const [missions, setMissions] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,7 +121,7 @@ export default function Missions() {
         return () => unsubscribe();
     }, []);
 
-    // 2. Add Mission (Admin Only)
+    // 2. Add Task (Admin Only)
     const handleDeploy = async (e) => {
         e.preventDefault();
         if (!newTask || !targetAgent) return;
@@ -47,6 +138,7 @@ export default function Missions() {
         setIsModalOpen(false);
         setNewTask("");
         setTargetAgent("");
+        setPriority("medium");
     };
 
     // 3. Update Status
@@ -63,9 +155,22 @@ export default function Missions() {
 
     // Helper to get Agent Image
     const getAgentImage = (nameOrId) => {
+        if (nameOrId === "All Agents") return null;
         const agent = members.find(m => m.name === nameOrId || m.id === nameOrId);
         return agent ? agent.image : null;
     };
+
+    // Prepare Options
+    const agentOptions = [
+        { value: "All Agents", label: "All Agents", icon: Users },
+        ...members.map(m => ({ value: m.name, label: m.name, image: m.image }))
+    ];
+
+    const priorityOptions = [
+        { value: "low", label: "Low Priority" },
+        { value: "medium", label: "Medium Priority" },
+        { value: "high", label: "Critical Priority" },
+    ];
 
     return (
         <div className="space-y-8 pb-12">
@@ -73,9 +178,9 @@ export default function Missions() {
             {/* --- Header --- */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Active Directives</h2>
+                    <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Task Board</h2>
                     <p className="text-slate-500 font-medium max-w-xl">
-                        Manage tactical operations and chaos distribution.
+                        Manage tactical operations and tasks assignments.
                     </p>
                 </div>
 
@@ -84,14 +189,14 @@ export default function Missions() {
                         onClick={() => setIsModalOpen(true)}
                         className="group flex items-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-[1.2rem] font-bold shadow-xl shadow-slate-900/20 hover:bg-indigo-600 hover:shadow-indigo-500/30 transition-all hover:-translate-y-1"
                     >
-                        <Plus size={20} className="group-hover:rotate-90 transition-transform" /> Deploy Directive
+                        <Plus size={20} className="group-hover:rotate-90 transition-transform" /> Assign Task
                     </button>
                 )}
             </div>
 
-            {/* --- Mission Grid --- */}
+            {/* --- Task Grid --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <AnimatePresence>
+                <AnimatePresence mode="popLayout">
                     {missions.map((mission) => (
                         <motion.div
                             layout
@@ -114,7 +219,7 @@ export default function Missions() {
                                             ? 'bg-amber-50 text-amber-600 border-amber-100'
                                             : 'bg-slate-100 text-slate-500 border-slate-200'
                                 }`}>
-                                    {mission.priority} Priority
+                                    {mission.priority}
                                 </span>
 
                                 {isAdmin && (
@@ -137,15 +242,19 @@ export default function Missions() {
                             {/* Footer: Assignee & Checkbox */}
                             <div className="flex items-center justify-between pt-6 border-t border-slate-50">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white shadow-sm bg-slate-100">
-                                        <img
-                                            src={getAgentImage(mission.assignedTo) || `https://ui-avatars.com/api/?name=${mission.assignedTo}&background=random`}
-                                            alt="Agent"
-                                            className="w-full h-full object-cover"
-                                        />
+                                    <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white shadow-sm bg-slate-100 flex items-center justify-center">
+                                        {mission.assignedTo === "All Agents" ? (
+                                            <Users size={20} className="text-slate-400" />
+                                        ) : (
+                                            <img
+                                                src={getAgentImage(mission.assignedTo) || `https://ui-avatars.com/api/?name=${mission.assignedTo}&background=random`}
+                                                alt="Agent"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        )}
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Operative</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Agent</span>
                                         <span className="text-xs font-bold text-slate-900">{mission.assignedTo}</span>
                                     </div>
                                 </div>
@@ -171,12 +280,12 @@ export default function Missions() {
                     <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-6">
                         <ShieldAlert className="w-10 h-10 text-emerald-500" />
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 mb-2">All Clear</h3>
-                    <p className="text-slate-500 font-medium">No active operations. The world is safe... for now.</p>
+                    <h3 className="text-2xl font-black text-slate-900 mb-2">No Active Tasks</h3>
+                    <p className="text-slate-500 font-medium">Clear board. The team is awaiting orders.</p>
                 </div>
             )}
 
-            {/* --- ADD MISSION MODAL --- */}
+            {/* --- ADD TASK MODAL --- */}
             <AnimatePresence>
                 {isModalOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -189,16 +298,16 @@ export default function Missions() {
                             initial={{ scale: 0.9, opacity: 0, y: 20 }} 
                             animate={{ scale: 1, opacity: 1, y: 0 }} 
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 overflow-hidden"
+                            className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 overflow-visible"
                         >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                             
-                            <h2 className="text-3xl font-black text-slate-900 mb-1 relative z-10">New Directive</h2>
-                            <p className="text-slate-500 text-sm font-medium mb-8 relative z-10">Assign a new task to a field agent.</p>
+                            <h2 className="text-3xl font-black text-slate-900 mb-1 relative z-10">New Task</h2>
+                            <p className="text-slate-500 text-sm font-medium mb-8 relative z-10">Assign a new objective to the team.</p>
 
                             <form onSubmit={handleDeploy} className="space-y-6 relative z-10">
                                 <div>
-                                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1 mb-2 block">Mission Details</label>
+                                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1 mb-2 block">Task Details</label>
                                     <textarea
                                         autoFocus
                                         placeholder="Brief the agent on their objective..."
@@ -209,42 +318,22 @@ export default function Missions() {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1 mb-2 block">Assign Agent</label>
-                                        <div className="relative">
-                                            <select
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-slate-700 outline-none focus:border-indigo-500 appearance-none transition-all"
-                                                value={targetAgent}
-                                                onChange={(e) => setTargetAgent(e.target.value)}
-                                            >
-                                                <option value="">Select Agent</option>
-                                                {members.map(m => (
-                                                    <option key={m.id} value={m.name}>{m.name}</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                                <Target size={16} />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <CustomDropdown 
+                                        label="Assign Agent"
+                                        options={agentOptions}
+                                        value={targetAgent}
+                                        onChange={setTargetAgent}
+                                        type="agent"
+                                        icon={Target}
+                                    />
 
-                                    <div>
-                                        <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1 mb-2 block">Priority</label>
-                                        <div className="relative">
-                                            <select
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-slate-700 outline-none focus:border-indigo-500 appearance-none transition-all"
-                                                value={priority}
-                                                onChange={(e) => setPriority(e.target.value)}
-                                            >
-                                                <option value="low">Low</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="high">Critical</option>
-                                            </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                                <AlertTriangle size={16} />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <CustomDropdown 
+                                        label="Priority"
+                                        options={priorityOptions}
+                                        value={priority}
+                                        onChange={setPriority}
+                                        icon={AlertTriangle}
+                                    />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 pt-4">
@@ -259,7 +348,7 @@ export default function Missions() {
                                         type="submit"
                                         className="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-900/10"
                                     >
-                                        Initiate
+                                        Assign
                                     </button>
                                 </div>
                             </form>

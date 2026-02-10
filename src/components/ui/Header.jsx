@@ -68,9 +68,11 @@ export default function Header() {
                             !scrolled ? 'bg-white/30 backdrop-blur-md border border-white/20 shadow-sm hover:bg-white/50' : ''
                         }`}
                     >
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center font-black text-lg group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-lg shadow-indigo-500/20">
-                            B
-                        </div>
+                        <img 
+                            src={logo} 
+                            alt="Logo" 
+                            className="w-10 h-10 rounded-2xl object-cover shadow-lg shadow-indigo-500/20 group-hover:scale-110 group-hover:rotate-3 transition-transform" 
+                        />
                         <div className="flex flex-col leading-none">
                             <span className="font-black text-slate-900 tracking-tight text-sm">BAKCHODI</span>
                             <span className="text-[10px] font-bold text-slate-500 tracking-widest uppercase group-hover:text-indigo-600 transition-colors">International</span>
