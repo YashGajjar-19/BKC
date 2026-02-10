@@ -69,7 +69,7 @@ export default function Header() {
                         }`}
                     >
 
-                        <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-lg shadow-indigo-500/20 overflow-hidden">
+                        <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center transition-transform shadow-lg shadow-indigo-500/20 overflow-hidden">
                             <img src={logo} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col leading-none">
