@@ -27,7 +27,6 @@ import { MessageFeed } from "./components/MessageFeed";
 import { ChatInput } from "./components/ChatInput";
 import { ChatHeader, EmptyChat } from "./components/ChatHeader";
 
-
 const CommChannel = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
