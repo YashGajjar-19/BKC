@@ -1,9 +1,11 @@
 // src/components/layouts/DashboardLayout.jsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, Users, Zap, Settings, LogOut, Search, Menu, X, Globe, ChevronRight, MessageSquare, Bell } from "lucide-react";
+import { LayoutDashboard, Users, Zap, Settings, LogOut, Search, Menu, X, Globe, ChevronRight, MessageSquare, Bell, Check, Trash2 } from "lucide-react";
+import { collection, query, where, onSnapshot, orderBy, updateDoc, doc, deleteDoc, writeBatch } from "firebase/firestore";
 import { useAuth } from "../../context/AuthContext";
+import { db } from "../../lib/firebase";
 import logo from "../../assets/images/grp_bit/Logo.png";
 
 const NavItem = ({ icon: Icon, label, path, isActive, isCollapsed }) => (
@@ -30,10 +32,16 @@ export default function DashboardLayout({ children }) {
     const navigate = useNavigate();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    
+    // Notification State
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const notifRef = useRef(null);
 
     const navItems = [
         { icon: LayoutDashboard, label: "Overview", path: "/dashboard" },
-        { icon: Zap, label: "Directives", path: "/dashboard/missions" },
+        { icon: Zap, label: "Tasks", path: "/dashboard/missions" },
         { icon: Users, label: "Agents", path: "/dashboard/team" },
         { icon: Settings, label: "Global Settings", path: "/dashboard/settings" },
     ];
@@ -41,6 +49,60 @@ export default function DashboardLayout({ children }) {
     const handleLogout = () => {
         logout();
         navigate("/");
+    };
+
+    // Listen for Notifications
+    useEffect(() => {
+        if (!user?.name) return;
+
+        // Query: Notifications for specific user OR "All Agents"
+        const q = query(
+            collection(db, "notifications"),
+            where("recipient", "in", [user.name, "All Agents"]),
+            orderBy("createdAt", "desc")
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setNotifications(notifs);
+            setUnreadCount(notifs.filter(n => !n.readBy?.includes(user.uid)).length);
+        });
+
+        return () => unsubscribe();
+    }, [user]);
+
+    // Close Notif Dropdown on Click Outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notifRef.current && !notifRef.current.contains(event.target)) {
+                setIsNotifOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    // Mark as Read
+    const handleMarkRead = async (id) => {
+        if (!id) return;
+        const notif = notifications.find(n => n.id === id);
+        const currentReads = notif.readBy || [];
+        if (!currentReads.includes(user.uid)) {
+            await updateDoc(doc(db, "notifications", id), {
+                readBy: [...currentReads, user.uid]
+            });
+        }
+    };
+
+    const handleClearAll = async () => {
+        const batch = writeBatch(db);
+        notifications.forEach(n => {
+            if (n.recipient === user.name) { // Only delete your own specific ones
+                const ref = doc(db, "notifications", n.id);
+                batch.delete(ref);
+            }
+        });
+        await batch.commit();
     };
 
     return (
@@ -236,10 +298,76 @@ export default function DashboardLayout({ children }) {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors relative">
-                            <Bell size={20} />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
-                        </button>
+                        
+                        {/* --- Notifications --- */}
+                        <div className="relative" ref={notifRef}>
+                            <button 
+                                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                                className="p-2 text-slate-400 hover:bg-slate-100 hover:text-indigo-600 rounded-full transition-colors relative"
+                            >
+                                <Bell size={20} />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border border-white animate-pulse"></span>
+                                )}
+                            </button>
+
+                            <AnimatePresence>
+                                {isNotifOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 origin-top-right"
+                                    >
+                                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Notifications</span>
+                                            {notifications.length > 0 && (
+                                                <button onClick={handleClearAll} className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1">
+                                                    <Trash2 size={12} /> Clear
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                            {notifications.length > 0 ? (
+                                                notifications.map((notif) => {
+                                                    const isUnread = !notif.readBy?.includes(user?.uid);
+                                                    return (
+                                                        <div 
+                                                            key={notif.id}
+                                                            onClick={() => handleMarkRead(notif.id)}
+                                                            className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer flex gap-3 ${isUnread ? 'bg-indigo-50/30' : ''}`}
+                                                        >
+                                                            <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${isUnread ? 'bg-indigo-500' : 'bg-slate-200'}`} />
+                                                            <div className="flex-1">
+                                                                <p className={`text-sm ${isUnread ? 'font-bold text-slate-900' : 'font-medium text-slate-500'}`}>
+                                                                    {notif.message}
+                                                                </p>
+                                                                <div className="flex items-center gap-2 mt-1">
+                                                                    <span className="text-[10px] font-bold text-slate-400 capitalize">{notif.type}</span>
+                                                                    <span className="text-[10px] text-slate-300">•</span>
+                                                                    <span className="text-[10px] text-slate-400">
+                                                                        {notif.createdAt?.seconds ? new Date(notif.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })
+                                            ) : (
+                                                <div className="p-8 text-center text-slate-400">
+                                                    <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                        <Bell size={20} className="opacity-50" />
+                                                    </div>
+                                                    <p className="text-xs font-bold uppercase tracking-widest">No Updates</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
                         <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 bg-slate-100">
                              <img src={user?.image || `https://ui-avatars.com/api/?name=${user?.name}`} alt="User" className="w-full h-full object-cover" />
                         </div>

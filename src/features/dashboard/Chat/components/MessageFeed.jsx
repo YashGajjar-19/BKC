@@ -77,6 +77,19 @@ export const MessageFeed = ({ messages, user, activeChatUser, handleScroll, mess
                                         : "bg-white text-slate-700 border border-slate-100 rounded-2xl rounded-tl-none"
                                     }`}
                                 >
+                                    {msg.fileUrl && (
+                                        <div className="mb-2 rounded-lg overflow-hidden border border-slate-700/20">
+                                            {msg.fileType?.startsWith('image/') ? (
+                                                <img src={msg.fileUrl} alt="Attachment" className="max-w-full h-auto max-h-60 object-cover cursor-pointer hover:scale-105 transition-transform" />
+                                            ) : msg.fileType?.startsWith('video/') ? (
+                                                <video src={msg.fileUrl} controls className="max-w-full h-auto max-h-60" />
+                                            ) : (
+                                                <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 bg-slate-800/10 hover:bg-slate-800/20 rounded-lg transition-colors">
+                                                    <span className="text-xs font-bold underline">Download File</span>
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
                                     {msg.text}
                                     <span className={`text-[9px] font-bold ml-2 opacity-50 inline-block translate-y-[1px] ${isMe ? "text-slate-300" : "text-slate-400"}`}>
                                         {msg.createdAt?.seconds ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}

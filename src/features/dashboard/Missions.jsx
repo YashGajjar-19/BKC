@@ -126,6 +126,7 @@ export default function Tasks() {
         e.preventDefault();
         if (!newTask || !targetAgent) return;
 
+        // Create Task
         await addDoc(collection(db, "missions"), {
             title: newTask,
             assignedTo: targetAgent, // Store the ID or Name
@@ -133,6 +134,15 @@ export default function Tasks() {
             status: "pending", // pending, active, completed
             priority,
             createdAt: new Date(),
+        });
+
+        // Create Notification for the Agent(s)
+        await addDoc(collection(db, "notifications"), {
+            recipient: targetAgent, // "All Agents" or specific name
+            message: `New Directive: ${newTask} (Priority: ${priority})`,
+            type: "task",
+            createdAt: new Date(),
+            readBy: [] // Array of user IDs who have read this
         });
 
         setIsModalOpen(false);
@@ -145,6 +155,17 @@ export default function Tasks() {
     const toggleStatus = async (mission) => {
         const nextStatus = mission.status === "pending" ? "completed" : "pending";
         await updateDoc(doc(db, "missions", mission.id), { status: nextStatus });
+
+        // Notify the Assigner if Completed
+        if (nextStatus === "completed" && mission.assignedBy) {
+            await addDoc(collection(db, "notifications"), {
+                recipient: mission.assignedBy,
+                message: `Task Completed: "${mission.title}" by ${user.name}`,
+                type: "alert",
+                createdAt: new Date(),
+                readBy: []
+            });
+        }
     };
 
     // 4. Delete (Admin Only)

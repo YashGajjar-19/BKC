@@ -6,7 +6,7 @@ import {
     Edit2, Save, X, Trash2, MessageCircle,
     MoreHorizontal, CheckCircle, AlertCircle, Zap, ShieldCheck, MapPin
 } from "lucide-react";
-import { collection, query, onSnapshot, doc, updateDoc, setDoc } from "firebase/firestore";
+import { collection, query, onSnapshot, doc, updateDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { members as staticMembers } from "../../lib/data";
 import { useAuth } from "../../context/AuthContext";
@@ -36,7 +36,7 @@ const StatBadge = ({ icon: Icon, label, value, color = "text-slate-600" }) => (
 
 // --- Modals ---
 
-const EditMemberModal = ({ isOpen, onClose, member, onSave }) => {
+const EditMemberModal = ({ isOpen, onClose, member, onSave, onDelete }) => {
     const [formData, setFormData] = useState({ ...member });
     const [loading, setLoading] = useState(false);
 
@@ -154,11 +154,19 @@ const EditMemberModal = ({ isOpen, onClose, member, onSave }) => {
 
                 </form>
 
-                <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
-                    <button onClick={onClose} className="px-6 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 transition-colors text-sm">Cancel</button>
-                    <button onClick={handleSubmit} disabled={loading} className="px-8 py-3 rounded-2xl font-bold text-white bg-slate-900 hover:bg-indigo-600 shadow-xl shadow-slate-900/10 hover:shadow-indigo-500/20 transition-all text-sm flex items-center gap-2">
-                        {loading ? "Saving..." : <><Save size={18} /> Save Changes</>}
+                <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-between gap-3">
+                    <button 
+                        onClick={() => onDelete(member)}
+                        className="px-6 py-3 rounded-2xl font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors text-sm flex items-center gap-2"
+                    >
+                        <Trash2 size={18} /> Delete Profile
                     </button>
+                    <div className="flex gap-3">
+                        <button onClick={onClose} className="px-6 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 transition-colors text-sm">Cancel</button>
+                        <button onClick={handleSubmit} disabled={loading} className="px-8 py-3 rounded-2xl font-bold text-white bg-slate-900 hover:bg-indigo-600 shadow-xl shadow-slate-900/10 hover:shadow-indigo-500/20 transition-all text-sm flex items-center gap-2">
+                            {loading ? "Saving..." : <><Save size={18} /> Save Changes</>}
+                        </button>
+                    </div>
                 </div>
             </motion.div>
         </div>
@@ -181,20 +189,41 @@ export default function Team() {
             const unsubscribe = onSnapshot(q, (snapshot) => {
                 const firestoreUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                // Merge Static & Firestore
-                const combined = [...staticMembers];
-                const staticEmailMap = new Map(combined.map(m => [m.email, m]));
+                // Start with Static Members
+                // We use map to ensure we can update them in place
+                let mergedList = [...staticMembers];
 
                 firestoreUsers.forEach(fUser => {
-                    if (staticEmailMap.has(fUser.email)) {
-                        const index = combined.findIndex(m => m.email === fUser.email);
-                        combined[index] = { ...combined[index], ...fUser }; 
+                    // Try to find a match in the static list by Email OR Name
+                    // This prevents duplicates if the static file doesn't have the email yet
+                    const existingIndex = mergedList.findIndex(m => 
+                        (m.email && m.email === fUser.email) || 
+                        (m.name && m.name === fUser.name)
+                    );
+
+                    if (existingIndex !== -1) {
+                        // Match found! Merge Firestore data into the static entry
+                        // Firestore data (fUser) takes precedence for dynamic fields
+                        mergedList[existingIndex] = { ...mergedList[existingIndex], ...fUser };
                     } else {
-                        combined.push(fUser);
+                        // No match found, it's a new agent (signed up via Google)
+                        mergedList.push(fUser);
                     }
                 });
 
-                setAllMembers(combined);
+                // Deduplicate strictly by ID/Email just in case (e.g. if Firestore has duplicates itself)
+                const uniqueList = [];
+                const seenIds = new Set();
+                
+                mergedList.forEach(member => {
+                    const uniqueKey = member.uid || member.email || member.name;
+                    if (!seenIds.has(uniqueKey)) {
+                        seenIds.add(uniqueKey);
+                        uniqueList.push(member);
+                    }
+                });
+
+                setAllMembers(uniqueList);
                 setLoading(false);
             });
 
@@ -207,14 +236,44 @@ export default function Team() {
     const handleUpdateMember = async (updatedData) => {
         try {
             let docId = updatedData.uid || updatedData.id;
-            if (typeof docId === 'number') {
-                docId = updatedData.email; 
+            // Handle legacy/static ID migration if needed
+            if (typeof docId === 'number' || !docId) {
+                // If it's a static member with no UID, we can't update a random ID.
+                // But usually this function is called on Firestore users who have IDs.
+                // We'll trust the ID passed from the object.
+                console.warn("Attempting to update member without valid UID", updatedData);
+                return;
             }
+            
             const { id, ...dataToSave } = updatedData;
             await setDoc(doc(db, "users", String(docId)), dataToSave, { merge: true });
+            
+            // Close modal after save
+            setEditingMember(null); 
         } catch (error) {
             console.error("Error updating member:", error);
             alert("Failed to update profile. Check console.");
+        }
+    };
+
+    const handleDeleteMember = async (memberToDelete) => {
+        if (!window.confirm(`Are you sure you want to PERMANENTLY DELETE ${memberToDelete.name}? This cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const docId = memberToDelete.uid || memberToDelete.id;
+            if (!docId) {
+                alert("Cannot delete this profile (invalid ID).");
+                return;
+            }
+
+            await deleteDoc(doc(db, "users", String(docId)));
+            alert("Profile deleted successfully.");
+            setEditingMember(null); // Close modal if open
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            alert("Failed to delete profile.");
         }
     };
 
@@ -303,6 +362,7 @@ export default function Team() {
                         member={editingMember} 
                         onClose={() => setEditingMember(null)} 
                         onSave={handleUpdateMember} 
+                        onDelete={handleDeleteMember}
                     />
                 )}
             </AnimatePresence>
